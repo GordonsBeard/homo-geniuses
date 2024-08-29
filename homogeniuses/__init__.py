@@ -1,3 +1,5 @@
+"""homo-geniuses: an appreciation of gay inventors"""
+
 import os
 
 import flask_login  # type:ignore
