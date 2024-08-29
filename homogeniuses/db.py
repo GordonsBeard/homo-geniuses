@@ -30,11 +30,18 @@ def query_db(query, args=(), one=False):
     return (results[0] if results else None) if one else results
 
 
-def insert_db(query, args=()):
+def insert_db(query, args=()) -> bool:
     """Insert some data into the database"""
+    success = False
     db = get_db()
-    db.execute(query, args)
-    db.commit()
+    try:
+        db.execute(query, args)
+        db.commit()
+        success = True
+    except sqlite3.Error as error:
+        print(error)
+        success = False
+    return success
 
 
 def init_db():

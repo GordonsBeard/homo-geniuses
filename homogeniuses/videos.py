@@ -3,7 +3,6 @@
 import dataclasses
 import random
 
-import flask_login  # type: ignore
 from flask import Blueprint, redirect, render_template, url_for
 
 from homogeniuses import db
@@ -24,7 +23,7 @@ def fetch_video(video_id) -> Video:
         """SELECT video_id, homo_votes, genius_votes FROM videos WHERE video_id = ?"""
     )
     video = db.query_db(select_video_sql, (video_id,), one=True)
-    return video
+    return Video(*video)
 
 
 def get_all_videos() -> list[Video]:
@@ -61,3 +60,38 @@ def video_page(video_id):
         return "Bad video_id"
 
     return render_template("videos/video_page.html", video=fetched_video)
+
+
+def cast_vote(video_id, vote_type) -> bool:
+    """Writes the vote to the database"""
+    hvote_sql = """UPDATE videos SET homo_votes = ? WHERE video_id = ?"""
+    gvote_sql = """UPDATE videos SET genius_votes = ? WHERE video_id = ?"""
+    success = False
+    video = fetch_video(video_id)
+    if vote_type == "hvote":
+        success = db.insert_db(hvote_sql, (video.homo_votes + 1, video_id))
+    elif vote_type == "gvote":
+        success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
+
+    return success
+
+
+@bp.route("/<video_id>/<vote_type>")
+def vote_on_video(video_id, vote_type):
+    """Cast the vote for a video, called from client-side"""
+    result = {"message": "Unknown vote logged", "success": False}
+    if not video_id:
+        result["message"] = "Invalid video_id"
+        result["success"] = False
+
+    if vote_type == "hvote":
+        result["message"] = "homo vote logged"
+        result["success"] = cast_vote(video_id, vote_type)
+    elif vote_type == "gvote":
+        result["message"] = "genius vote logged"
+        result["success"] = cast_vote(video_id, vote_type)
+    else:
+        result["message"] = "unknown vote"
+        result["success"] = False
+
+    return result

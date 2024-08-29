@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Homo-Geniuses</title>
+    <meta name="description" content="An appreciation of gay inventors.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/reset.css" />
     <link rel="stylesheet" href="/static/css/style.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="An appreciation of gay inventors.">
-    <title>Homo-Geniuses</title>
+    {% block head %}{% endblock head %}
 </head>
 <body>
     <nav aria-labelledby="user-panel" class="user-panel">
@@ -32,5 +33,6 @@
     <main class="">
         {% block video %}{% endblock %}
     </main>
+    {% block script %}{% endblock script %}
 </body>
 </html>

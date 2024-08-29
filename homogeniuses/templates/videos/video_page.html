@@ -1,16 +1,20 @@
-{% extends 'home.html' %}
+{% extends 'base.html' %}
 
 {% block video %}
-<div class="video" aria-label="Homo-genius video">
-    <iframe src="https://www.youtube.com/embed/AonAoNCq7RQ?si=a_T_HSTJcMHgPl6T&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<div id="vid" class="video" aria-label="Homo-genius video" data-video_id="{{ video.video_id }}">
+    <!-- <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
 </div>
 <div class="votes" aria-label="Vote options">
-    <button type="button">homo</button>
+    <button type="button" class="hvote">homo</button>
     <span class="or">or</span>
-    <button type="button">genius</button>
+    <button type="button" class="gvote">genius</button>
 </div>
 <div class="score" aria-label="Video score">
-    <p>Votes for homo: 0</p>
-    <p>Votes for genius: 0</p>
+    <p>Votes for homo: <span class="hcount">{{ video.homo_votes }}</span></p>
+    <p>Votes for genius: <span class="gcount">{{ video.genius_votes }}</span></p>
 </div>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='/js/videos.js') }}"></script>
 {% endblock %}
