@@ -7,7 +7,7 @@ import flask_login  # type: ignore
 from flask import Blueprint, current_app, g, json, redirect, request, url_for
 from flask_login import LoginManager, login_required, logout_user
 
-from homogeniuses.db import query_db
+from homogeniuses import db
 from homogeniuses.user import User, create_or_update_user
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -25,7 +25,7 @@ def load_user(req_steam_id):
     select_user_statment = (
         """SELECT steam_id, handle, avatar, active FROM users WHERE steam_id=?"""
     )
-    user_vals = query_db(select_user_statment, (req_steam_id,), one=True)
+    user_vals = db.query_db(select_user_statment, (req_steam_id,), one=True)
     return (
         User(user_vals[0], user_vals[1], user_vals[2], user_vals[3])
         if user_vals

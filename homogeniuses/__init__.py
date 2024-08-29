@@ -42,4 +42,8 @@ def create_app(test_config=None):
 
         app.register_blueprint(user.bp)
 
+        from . import videos
+
+        app.register_blueprint(videos.bp)
+
     return app

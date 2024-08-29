@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS votes;
+DROP TABLE IF EXISTS videos;
 
 CREATE TABLE users (
     steam_id TEXT NOT NULL PRIMARY KEY,
@@ -14,4 +15,10 @@ CREATE TABLE votes (
     vote INTEGER NOT NULL,
     unique(steam_id, idea_id),
     FOREIGN KEY (steam_id) REFERENCES user (steam_id)
+);
+
+CREATE TABLE videos (
+    video_id TEXT NOT NULL PRIMARY KEY,
+    homo_votes INTEGER NOT NULL DEFAULT 0,
+    genius_votes INTEGER NOT NULL DEFAULT 0
 );
