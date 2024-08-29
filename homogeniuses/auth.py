@@ -17,9 +17,6 @@ login_manager.init_app(current_app)
 STEAM_OPENID_URL = "https://steamcommunity.com/openid/login"
 STEAM_ID_RE = re.compile("https://steamcommunity.com/openid/id/(.*?)$")
 
-current_app.config.from_pyfile("config.py")
-steam_api_key = current_app.config["STEAM_API_KEY"]
-
 
 @login_manager.user_loader
 def load_user(req_steam_id):
