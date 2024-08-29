@@ -1,5 +1,6 @@
 """homo-geniuses: an appreciation of gay inventors"""
 
+# pylint: disable=C
 import os
 
 import flask_login  # type:ignore
@@ -34,5 +35,9 @@ def create_app(test_config=None):
         from . import auth
 
         app.register_blueprint(auth.bp)
+
+        from . import user
+
+        app.register_blueprint(user.bp)
 
     return app

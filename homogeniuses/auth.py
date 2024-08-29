@@ -7,7 +7,8 @@ import flask_login  # type: ignore
 from flask import Blueprint, current_app, g, json, redirect, request, url_for
 from flask_login import LoginManager, login_required, logout_user
 
-from homogeniuses.db import User, get_or_create_user, query_db
+from homogeniuses.db import query_db
+from homogeniuses.user import User, create_or_update_user
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -55,7 +56,6 @@ def login():
 
 def get_user_info(steam_id):
     """Gets the information from steam about the user"""
-    print(current_app.config.items())
     options = {"key": current_app.config["STEAM_API_KEY"], "steamids": steam_id}
     url = (
         "https://api.steampowered.com"
@@ -72,7 +72,7 @@ def authorize():
     match = STEAM_ID_RE.search(dict(request.args)["openid.identity"])
     steam_id = match.group(1)
     steam_data = get_user_info(steam_id)
-    g.user = get_or_create_user(
+    g.user = create_or_update_user(
         match.group(1), steam_data["personaname"], steam_data["avatar"]
     )
     flask_login.login_user(g.user)
