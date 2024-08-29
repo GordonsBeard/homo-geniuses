@@ -1,6 +1,8 @@
 """User profiles, management, routes"""
 
+import flask_login
 from flask import Blueprint, redirect, url_for
+from flask_login import login_required
 
 from homogeniuses import db
 
@@ -55,3 +57,16 @@ def user_profile(steam_id: str):
         return "No steamid provided"
 
     return f"User profile for: {steam_id}"
+
+
+@login_required
+@bp.route("/<steam_id>/edit")
+def edit_user_profile(steam_id: str):
+    """public user profile"""
+    if steam_id == "":
+        return "No steamid provided"
+
+    if steam_id != flask_login.current_user.steam_id:
+        return "You cannot edit this player's profile."
+
+    return f"Editing user profile for: {steam_id}"

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/reset.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An appreciation of gay inventors.">
+    <title>Homo-Geniuses</title>
+</head>
+<body>
+    <header>
+        <h1>Homo-Geniuses: an appreciation of gay inventors</h1>
+    </header>
+    <nav aria-labelledby="user-panel" class="user-panel">
+        <h2 id="user-panel">User panel</h2>
+        {% if user %}
+        <div>
+            <img src="{{ user.avatar }}" alt="Steam avatar for {{user.handle}}" width="32" height="32"/>
+            <a href="{{ url_for('user.user_profile', steam_id=user.steam_id) }}">{{ user.handle }}</a>
+        </div>
+        {% endif %}
+        <ul>
+            {% if not user %}
+            <li><a href="{{ url_for('auth.login') }}">Jack In (via Steam)</a></li>
+            {% else %}
+            <li><a href="{{ url_for('user.edit_user_profile', steam_id = user.steam_id) }}">Edit Profile</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Jack Out</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <main>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/AonAoNCq7RQ?si=a_T_HSTJcMHgPl6T&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </main>
+</body>
+</html>

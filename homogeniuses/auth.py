@@ -23,10 +23,14 @@ STEAM_ID_RE = re.compile("https://steamcommunity.com/openid/id/(.*?)$")
 def load_user(req_steam_id):
     """Required function for flask_login to do its thing"""
     select_user_statment = (
-        """SELECT steam_id, handle, active FROM users WHERE steam_id=?"""
+        """SELECT steam_id, handle, avatar, active FROM users WHERE steam_id=?"""
     )
     user_vals = query_db(select_user_statment, (req_steam_id,), one=True)
-    return User(user_vals[0], user_vals[1], user_vals[2]) if user_vals else None
+    return (
+        User(user_vals[0], user_vals[1], user_vals[2], user_vals[3])
+        if user_vals
+        else None
+    )
 
 
 @bp.route("/jack-out")

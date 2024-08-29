@@ -16,9 +16,8 @@ def get_db():
     return g.db
 
 
-def close_db(e=None):
+def close_db(_=None):
     """closes the connection once its no longer needed"""
-    print(e)
     db = g.pop("db", None)
     if db is not None:
         db.close()

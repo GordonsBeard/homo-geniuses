@@ -4,7 +4,7 @@
 import os
 
 import flask_login  # type:ignore
-from flask import Flask
+from flask import Flask, render_template
 
 
 def create_app(test_config=None):
@@ -25,7 +25,9 @@ def create_app(test_config=None):
     @app.route("/")
     def hello():
         user = flask_login.current_user
-        return f'<a href="http://localhost:5000/auth/jack-in">Login with steam</a> User: {user.handle if not user.is_anonymous else None}'
+        return render_template(
+            "home.html", user=user if not user.is_anonymous else None
+        )
 
     from . import db
 
