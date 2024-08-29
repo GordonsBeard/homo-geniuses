@@ -9,9 +9,6 @@
     <title>Homo-Geniuses</title>
 </head>
 <body>
-    <header>
-        <h1>Homo-Geniuses: an appreciation of gay inventors</h1>
-    </header>
     <nav aria-labelledby="user-panel" class="user-panel">
         <h2 id="user-panel">User panel</h2>
         {% if user %}
@@ -29,8 +26,22 @@
             {% endif %}
         </ul>
     </nav>
-    <main>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/AonAoNCq7RQ?si=a_T_HSTJcMHgPl6T&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <header>
+        <h1>Homo-Geniuses: an appreciation of gay inventors</h1>
+    </header>
+    <main class="">
+        <div class="video" aria-label="Homo-genius video">
+            <iframe src="https://www.youtube.com/embed/AonAoNCq7RQ?si=a_T_HSTJcMHgPl6T&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div class="votes" aria-label="Vote options">
+            <button type="button">homo</button>
+            <span class="or">or</span>
+            <button type="button">genius</button>
+        </div>
+        <div class="score" aria-label="Video score">
+            <p>Votes for homo: 0</p>
+            <p>Votes for genius: 0</p>
+        </div>
     </main>
 </body>
 </html>

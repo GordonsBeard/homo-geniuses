@@ -1,6 +1,6 @@
 """User profiles, management, routes"""
 
-import flask_login
+import flask_login  # type: ignore
 from flask import Blueprint, redirect, url_for
 from flask_login import login_required
 
