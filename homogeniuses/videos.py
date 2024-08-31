@@ -17,13 +17,13 @@ class Video:  # pylint: disable=missing-class-docstring
     genius_votes: int = 0
 
 
-def fetch_video(video_id) -> Video:
+def fetch_video(video_id) -> Video | None:
     """Returns a single video from a given video_id"""
     select_video_sql = (
         """SELECT video_id, homo_votes, genius_votes FROM videos WHERE video_id = ?"""
     )
     video = db.query_db(select_video_sql, (video_id,), one=True)
-    return Video(*video)
+    return Video(*video) if video else None
 
 
 def get_all_videos() -> list[Video]:
@@ -36,7 +36,8 @@ def get_all_videos() -> list[Video]:
 
 def get_random_video() -> Video:
     """Returns just a single video from the list of all videos"""
-    return random.choice(get_all_videos())
+    random_vid = random.choice(get_all_videos())
+    return random_vid
 
 
 def add_video_to_db(video_id) -> None:
@@ -50,6 +51,12 @@ def no_video_id():
     """If no video id was supplied just throw them to a random page"""
     random_video_id = get_random_video().video_id
     return redirect(url_for("videos.video_page", video_id=random_video_id))
+
+
+@bp.route("/random")
+def random_video():
+    """Random video selection."""
+    return no_video_id()
 
 
 @bp.route("/<video_id>")
@@ -68,10 +75,11 @@ def cast_vote(video_id, vote_type) -> bool:
     gvote_sql = """UPDATE videos SET genius_votes = ? WHERE video_id = ?"""
     success = False
     video = fetch_video(video_id)
-    if vote_type == "hvote":
-        success = db.insert_db(hvote_sql, (video.homo_votes + 1, video_id))
-    elif vote_type == "gvote":
-        success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
+    if video:
+        if vote_type == "hvote":
+            success = db.insert_db(hvote_sql, (video.homo_votes + 1, video_id))
+        elif vote_type == "gvote":
+            success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
 
     return success
 

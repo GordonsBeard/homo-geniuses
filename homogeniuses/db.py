@@ -5,6 +5,8 @@ import sqlite3
 import click
 from flask import current_app, g
 
+import homogeniuses.dummy_vids as dummy_vids
+
 
 def get_db():
     """grabs a reused connection to the database"""
@@ -60,9 +62,10 @@ def init_db_command():
 
 def fill_video_db():
     """Fills the video db with some test videos."""
+    insert_vid_sql = """INSERT INTO videos (video_id) VALUES (?);"""
     db = get_db()
-    with current_app.open_resource("dummy_vids.sql") as f:
-        db.executescript(f.read().decode("utf8"))
+    db.executemany(insert_vid_sql, dummy_vids.homo_genius_og_vids)
+    db.commit()
 
 
 @click.command("init-videos")

@@ -4,7 +4,7 @@
 import os
 
 import flask_login  # type:ignore
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template
 
 
 def create_app(test_config=None):
@@ -23,11 +23,8 @@ def create_app(test_config=None):
         pass
 
     @app.route("/")
-    def hello():
-        user = flask_login.current_user
-        return render_template(
-            "home.html", user=user if not user.is_anonymous else None
-        )
+    def index():
+        return videos.no_video_id()
 
     from . import db
 

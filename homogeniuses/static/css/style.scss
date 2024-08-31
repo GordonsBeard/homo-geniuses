@@ -45,12 +45,18 @@ main {
     &.girthy {
         max-width: 100%;
     }
+
     div.video iframe {
         border: 10px solid black;
         width: 100%;
         aspect-ratio: 16 / 9;
         max-height: 80vh;
     }
+
+    nav.video-nav {
+        text-align: center;
+    }
+
     div.votes {
         display: flex;
         border: 1px solid black;
@@ -70,9 +76,135 @@ main {
             border-radius: 6px;
             font-size: 2rem;
         }
-    }
 
-    .score {
-        
+        .slide {
+            font-size: 24px;
+            margin-inline: 1em;
+            font-weight: 700;
+        }
+
+        .emoji {
+            width: 100%;
+            caption {
+                text-align: center;
+                margin: 1em;
+            }
+            td {
+                text-align: center;
+                font-size: 32px;
+            }
+        }
     }
+}
+
+// from https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/
+
+// * * * COLORS * * *
+
+$color__fill:    #16a085; // green
+$font-size:      16px;    // <--- change the font size to change the size
+
+// dark version
+//@color__default: rgba(0,0,0,.2);
+//@color__hover:   rgba(0,0,0,.3);
+//@color__active:  rgba(0,0,0,.5);
+
+// light version
+$color__default: rgba(255,255,255,.5);
+$color__hover:   rgba(255,255,255,.7);
+$color__active:  rgba(255,255,255,1);
+
+
+input[type=range] {
+  box-sizing: border-box;
+  font-size: $font-size;
+  line-height: 1;
+  height: 2em;
+  background-color: transparent;
+  cursor: pointer;
+
+  // * * * RESET * * *
+
+  -webkit-appearance: none;
+  width: 100%;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  }
+  &:focus {
+    outline: none;
+  }
+  &::-ms-track {
+    width: 100%;
+    cursor: pointer;
+    background: transparent; 
+    border-color: transparent;
+    color: transparent;
+  }
+
+  // * * * TRUMP * * *
+
+  @mixin mx-trange-trump(){
+    width: 2em;
+    height: 2em;
+    margin-top: 0;
+    background-color: $color__fill;
+    border-radius: 1em;
+    border: 2px solid $color__default;
+    cursor: pointer;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @include mx-trange-trump();
+  }
+
+  &::-moz-range-thumb {
+    @include mx-trange-trump();
+  }
+
+  &::-ms-thumb {
+    @include mx-trange-trump();
+  }
+
+  &:hover{
+    &::-webkit-slider-thumb { border-color: $color__hover; }
+    &::-moz-range-thumb     { border-color: $color__hover; }
+    &::-ms-thumb            { border-color: $color__hover; }
+  }
+
+  //&:focus,
+  &:active{
+    &::-webkit-slider-thumb { border-color: $color__active; }
+    &::-moz-range-thumb     { border-color: $color__active; }
+    &::-ms-thumb            { border-color: $color__active; }
+  }
+
+  // * * * TRACK * * *
+
+  @mixin mx-range-track(){
+    width: 100%;
+    cursor: pointer;
+    height: 1em;
+    border-bottom: 2px solid $color__default;
+    background-color: transparent;
+  }
+
+
+  &::-webkit-slider-runnable-track {
+    @include mx-range-track();
+  }
+
+
+
+  &::-moz-range-track {
+    @include mx-range-track()
+  }
+
+  &::-ms-track {
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+
 }
