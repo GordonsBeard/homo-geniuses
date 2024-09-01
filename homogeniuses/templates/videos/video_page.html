@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block video %}
+{% block main %}
 <div id="vid" class="video" aria-label="Homo-genius video" data-video_id="{{ video.video_id }}">
     <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
@@ -11,34 +11,6 @@
     <button type="button" class="hvote">homo <span class="hcount">{{ video.homo_votes }}</span></button>
     <span class="or">or</span>
     <button type="button" class="gvote">genius <span class="gcount">{{ video.genius_votes }}</span></button>
-</div>
-<div class="votes" aria-label="Vote options">
-    <span class="slide">homo</span>
-    <input type="range" />
-    <span class="slide">genius</span>
-</div>
-<div class="votes" aria-label="Vote options">
-    <table class="emoji"> 
-        <caption>How do you feel about this video?</caption>
-        <tr>
-            <td>homo</td>
-            <td>🍆</td>
-            <td>🙃</td>
-            <td>🤝</td>
-            <td>🔥</td>
-            <td>🧠</td>
-            <td>genius</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><input type="radio" /></td>
-            <td><input type="radio" /></td>
-            <td><input type="radio" /></td>
-            <td><input type="radio" /></td>
-            <td><input type="radio" /></td>
-            <td></td>
-        </tr>
-    </table>
 </div>
 <div class="score" aria-label="Video score">
     <p>{{ sentiment }}</p>

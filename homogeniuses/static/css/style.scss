@@ -4,6 +4,11 @@
 
 html {
     font-size: 20px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+a {
+  color: #222;
 }
 
 body {
@@ -16,6 +21,8 @@ body {
 
 header {
     margin: 12px 12px 24px 12px;
+    text-align: right;
+
     h1 {
         font-family:'Courier New', Courier, monospace;
         font-size: clamp(20px, 5vw, 38px);
@@ -23,6 +30,15 @@ header {
         font-weight: 900;
         text-shadow: 3px 3px 0 rgba(40, 40, 40, .2);
         text-align: center;
+    }
+    
+    a.what {
+      font-size: 12px;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
 }
 
@@ -95,116 +111,4 @@ main {
             }
         }
     }
-}
-
-// from https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/
-
-// * * * COLORS * * *
-
-$color__fill:    #16a085; // green
-$font-size:      16px;    // <--- change the font size to change the size
-
-// dark version
-//@color__default: rgba(0,0,0,.2);
-//@color__hover:   rgba(0,0,0,.3);
-//@color__active:  rgba(0,0,0,.5);
-
-// light version
-$color__default: rgba(255,255,255,.5);
-$color__hover:   rgba(255,255,255,.7);
-$color__active:  rgba(255,255,255,1);
-
-
-input[type=range] {
-  box-sizing: border-box;
-  font-size: $font-size;
-  line-height: 1;
-  height: 2em;
-  background-color: transparent;
-  cursor: pointer;
-
-  // * * * RESET * * *
-
-  -webkit-appearance: none;
-  width: 100%;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-  }
-  &:focus {
-    outline: none;
-  }
-  &::-ms-track {
-    width: 100%;
-    cursor: pointer;
-    background: transparent; 
-    border-color: transparent;
-    color: transparent;
-  }
-
-  // * * * TRUMP * * *
-
-  @mixin mx-trange-trump(){
-    width: 2em;
-    height: 2em;
-    margin-top: 0;
-    background-color: $color__fill;
-    border-radius: 1em;
-    border: 2px solid $color__default;
-    cursor: pointer;
-  }
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    @include mx-trange-trump();
-  }
-
-  &::-moz-range-thumb {
-    @include mx-trange-trump();
-  }
-
-  &::-ms-thumb {
-    @include mx-trange-trump();
-  }
-
-  &:hover{
-    &::-webkit-slider-thumb { border-color: $color__hover; }
-    &::-moz-range-thumb     { border-color: $color__hover; }
-    &::-ms-thumb            { border-color: $color__hover; }
-  }
-
-  //&:focus,
-  &:active{
-    &::-webkit-slider-thumb { border-color: $color__active; }
-    &::-moz-range-thumb     { border-color: $color__active; }
-    &::-ms-thumb            { border-color: $color__active; }
-  }
-
-  // * * * TRACK * * *
-
-  @mixin mx-range-track(){
-    width: 100%;
-    cursor: pointer;
-    height: 1em;
-    border-bottom: 2px solid $color__default;
-    background-color: transparent;
-  }
-
-
-  &::-webkit-slider-runnable-track {
-    @include mx-range-track();
-  }
-
-
-
-  &::-moz-range-track {
-    @include mx-range-track()
-  }
-
-  &::-ms-track {
-    background: transparent;
-    border-color: transparent;
-    color: transparent;
-  }
-
 }

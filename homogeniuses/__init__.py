@@ -3,7 +3,6 @@
 # pylint: disable=C
 import os
 
-import flask_login  # type:ignore
 from flask import Flask, redirect, render_template
 
 

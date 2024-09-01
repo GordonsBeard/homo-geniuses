@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Homo-Geniuses</title>
+    <title>Homo-Geniuses{% block title %}{% endblock title %}</title>
     <meta name="description" content="An appreciation of gay inventors.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/reset.css" />
     <link rel="stylesheet" href="/static/css/style.css" />
-    {% block head %}{% endblock head %}
+    {% block head %}{% endblock head %} 
 </head>
 <body>
     <nav aria-labelledby="user-panel" class="user-panel">
@@ -29,9 +29,10 @@
     </nav>
     <header>
         <h1>Homo-Geniuses: an appreciation of gay inventors</h1>
+        <a class="what">what is this place?</a>
     </header>
     <main class="">
-        {% block video %}{% endblock %}
+        {% block main %}{% endblock main %}
     </main>
     {% block script %}{% endblock script %}
 </body>
