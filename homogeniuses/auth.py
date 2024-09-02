@@ -4,7 +4,7 @@ import re
 import urllib
 
 import flask_login  # type: ignore
-from flask import Blueprint, current_app, g, json, redirect, request, url_for
+from flask import Blueprint, current_app, g, json, redirect, request, session, url_for
 from flask_login import login_required, logout_user
 
 from homogeniuses.user import create_or_update_user
@@ -56,6 +56,9 @@ def authorize():
         match.group(1), steam_data["personaname"], steam_data["avatar"]
     )
     flask_login.login_user(g.user)
+    video_id = session["video_id"] if "video_id" in session else None
+    if video_id:
+        return redirect(url_for("videos.video_page", video_id=session.pop("video_id", None)))
     return redirect(url_for("videos.no_video_id"))
 
 @bp.route("/jack-out")
@@ -63,4 +66,7 @@ def authorize():
 def logout():
     """logout(): Logging out [the logout feature] (used for logging out)"""
     logout_user()
+    video_id = session["video_id"] if "video_id" in session else None
+    if video_id:
+        return redirect(url_for("videos.video_page", video_id=session.pop("video_id", None)))
     return redirect(url_for("videos.no_video_id"))

@@ -3,7 +3,7 @@
 import dataclasses
 import random
 
-from flask import Blueprint, redirect, render_template, url_for
+from flask import Blueprint, redirect, render_template, url_for, session
 import flask_login #type: ignore
 
 from homogeniuses import db
@@ -66,6 +66,7 @@ def video_page(video_id):
     fetched_video = fetch_video(video_id)
     if fetched_video is None:
         return "Bad video_id"
+    session["video_id"] = video_id
 
     return render_template("videos/video_page.html", video=fetched_video, user=flask_login.current_user)
 

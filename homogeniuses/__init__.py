@@ -4,7 +4,7 @@
 import os
 
 from flask import Flask, redirect, render_template
-from flask_login import LoginManager
+from flask_login import LoginManager #type: ignore
 import flask_login
 
 from homogeniuses.user import User
@@ -35,7 +35,6 @@ def create_app(test_config=None):
             """SELECT steam_id, handle, avatar, active FROM users WHERE steam_id=?"""
         )
         user_vals = db.query_db(select_user_statment, (req_steam_id,), one=True)
-        print(*user_vals)
         return (
             User(*user_vals)
             if user_vals
