@@ -15,12 +15,6 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 STEAM_OPENID_URL = "https://steamcommunity.com/openid/login"
 STEAM_ID_RE = re.compile("https://steamcommunity.com/openid/id/(.*?)$")
 
-@bp.route("/jack-out")
-@login_required
-def logout():
-    """logout(): Logging out [the logout feature] (used for logging out)"""
-    logout_user()
-    return redirect(url_for("videos.no_video_id"))
 
 
 @bp.route("/jack-in")
@@ -62,4 +56,11 @@ def authorize():
         match.group(1), steam_data["personaname"], steam_data["avatar"]
     )
     flask_login.login_user(g.user)
+    return redirect(url_for("videos.no_video_id"))
+
+@bp.route("/jack-out")
+@login_required
+def logout():
+    """logout(): Logging out [the logout feature] (used for logging out)"""
+    logout_user()
     return redirect(url_for("videos.no_video_id"))

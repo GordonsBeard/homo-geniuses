@@ -5,6 +5,7 @@ import os
 
 from flask import Flask, redirect, render_template
 from flask_login import LoginManager
+import flask_login
 
 from homogeniuses.user import User
 
@@ -47,7 +48,7 @@ def create_app(test_config=None):
     
     @app.route("/faq")
     def faq():
-        return "FAQ"
+        return render_template("faq.html", user=flask_login.current_user)
 
     from . import db
 

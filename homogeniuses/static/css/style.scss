@@ -21,7 +21,6 @@ body {
 
 header {
     margin: 12px 12px 24px 12px;
-    text-align: right;
 
     h1 {
         font-family:'Courier New', Courier, monospace;
@@ -31,28 +30,28 @@ header {
         text-shadow: 3px 3px 0 rgba(40, 40, 40, .2);
         text-align: center;
     }
-    
-    a.what {
-      font-size: 12px;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
 }
 
-nav.user-panel {
-    display: none;
-    visibility: hidden;
-    border: 1px solid black;
-    position: absolute;
-    right: 0;
+nav {
+    width: 100%;
 
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
-    margin: 5px;
+    ul {
+        list-style-type: none;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        line-height: 24px;
+
+        img {
+            margin-inline: 6px;
+        }
+    }
 }
 
 main {
@@ -98,17 +97,31 @@ main {
             margin-inline: 1em;
             font-weight: 700;
         }
-
-        .emoji {
-            width: 100%;
-            caption {
-                text-align: center;
-                margin: 1em;
-            }
-            td {
-                text-align: center;
-                font-size: 32px;
-            }
-        }
     }
+
+    h2, h3 {
+        font-weight: 800;
+        margin-bottom: 8px;
+        margin-top: 12px;
+        font-style: italic;
+        border-bottom: 1px solid black;
+    }
+
+    .golden {
+        text-align: center;
+        font-size: larger;
+    }
+    
+    p.faq {
+        font-size: 16px;
+        line-height: 22px;
+        padding-bottom: 1em;
+    }
+
+    p.golden {
+        font-size: 18px;
+        font-weight: 600;
+        
+    }
+
 }
