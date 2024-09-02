@@ -73,12 +73,14 @@ main {
     }
 
     div.votes {
+        position: relative;
         display: flex;
         border: 1px solid black;
         justify-content: space-around;
         align-items: center;
         padding: 10px;
         margin: 10px 0 10px 0;
+
         .or {
             font-size: 3rem;
             font-weight: 900;
@@ -92,10 +94,29 @@ main {
             font-size: 2rem;
         }
 
-        .slide {
-            font-size: 24px;
-            margin-inline: 1em;
-            font-weight: 700;
+        .login-nag {
+            position: absolute;
+            background-color: darkslategrey;
+            opacity: 60%;
+            height: 100%;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            display: none;
+
+            &:hover {
+                opacity: 100%;
+            }
+
+            a {
+                color: white;
+            }
+
+            &.disabled {
+                visibility: visible;
+                display: flex;
+            }
         }
     }
 

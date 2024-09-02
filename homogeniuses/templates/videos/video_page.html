@@ -8,9 +8,10 @@
     <a href="{{ url_for('videos.random_video') }}">Random video</a>
 </nav>
 <div class="votes" aria-label="Vote options">
-    <button type="button" class="hvote">homo <span class="hcount">{{ video.homo_votes }}</span></button>
-    <span class="or">or</span>
-    <button type="button" class="gvote">genius <span class="gcount">{{ video.genius_votes }}</span></button>
+    {% set disabled = "disabled" if not user.is_authenticated else ""%}
+    <div class="login-nag {{disabled}}"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a></div>
+    <button type="button" class="hvote" {{disabled}}>homo <span class="hcount">{{ video.homo_votes }}</span></button>
+    <button type="button" class="gvote" {{disabled}}>genius <span class="gcount">{{ video.genius_votes }}</span></button>
 </div>
 <div class="score" aria-label="Video score">
     <p>{{ sentiment }}</p>
