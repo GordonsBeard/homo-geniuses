@@ -4,6 +4,7 @@ import dataclasses
 import random
 
 from flask import Blueprint, redirect, render_template, url_for
+import flask_login #type: ignore
 
 from homogeniuses import db
 
@@ -50,7 +51,7 @@ def add_video_to_db(video_id) -> None:
 def no_video_id():
     """If no video id was supplied just throw them to a random page"""
     random_video_id = get_random_video().video_id
-    return redirect(url_for("videos.video_page", video_id=random_video_id))
+    return redirect(url_for('videos.video_page', video_id=random_video_id))
 
 
 @bp.route("/random")
@@ -66,7 +67,7 @@ def video_page(video_id):
     if fetched_video is None:
         return "Bad video_id"
 
-    return render_template("videos/video_page.html", video=fetched_video)
+    return render_template("videos/video_page.html", video=fetched_video, user=flask_login.current_user)
 
 
 def cast_vote(video_id, vote_type) -> bool:
@@ -103,3 +104,7 @@ def vote_on_video(video_id, vote_type):
         result["success"] = False
 
     return result
+
+@bp.route("/submit")
+def submit_clips():
+    return "Submit a clip here."

@@ -47,7 +47,7 @@ def create_or_update_user(steam_id, handle, avatar):
 @bp.route("/")
 def no_user_supplied():
     """no user to look up"""
-    return redirect(url_for("hello"))
+    return "No user id supplied."
 
 
 @bp.route("/<steam_id>")

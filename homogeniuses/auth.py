@@ -5,40 +5,22 @@ import urllib
 
 import flask_login  # type: ignore
 from flask import Blueprint, current_app, g, json, redirect, request, url_for
-from flask_login import LoginManager, login_required, logout_user
+from flask_login import login_required, logout_user
 
-from homogeniuses import db
-from homogeniuses.user import User, create_or_update_user
+from homogeniuses.user import create_or_update_user
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-login_manager = LoginManager()
-login_manager.init_app(current_app)
 
 STEAM_OPENID_URL = "https://steamcommunity.com/openid/login"
 STEAM_ID_RE = re.compile("https://steamcommunity.com/openid/id/(.*?)$")
-
-
-@login_manager.user_loader
-def load_user(req_steam_id):
-    """Required function for flask_login to do its thing"""
-    select_user_statment = (
-        """SELECT steam_id, handle, avatar, active FROM users WHERE steam_id=?"""
-    )
-    user_vals = db.query_db(select_user_statment, (req_steam_id,), one=True)
-    return (
-        User(user_vals[0], user_vals[1], user_vals[2], user_vals[3])
-        if user_vals
-        else None
-    )
-
 
 @bp.route("/jack-out")
 @login_required
 def logout():
     """logout(): Logging out [the logout feature] (used for logging out)"""
     logout_user()
-    return redirect(url_for("hello"))
+    return redirect(url_for("videos.no_video_id"))
 
 
 @bp.route("/jack-in")
@@ -80,4 +62,4 @@ def authorize():
         match.group(1), steam_data["personaname"], steam_data["avatar"]
     )
     flask_login.login_user(g.user)
-    return redirect(url_for("hello"))
+    return redirect(url_for("videos.no_video_id"))
