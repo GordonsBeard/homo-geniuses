@@ -1,6 +1,7 @@
 """Videos, the main interaction segment of the website (votes and stuff too)"""
 
 import dataclasses
+from functools import wraps
 import random
 import re
 
@@ -130,3 +131,16 @@ def submit_clip():
         db.insert_db(insert_into_queue_sql, (video_url, 0, flask_login.current_user.steam_id))
         flash("Video submitted.")
     return render_template("videos/submit.html", form=form, user=flask_login.current_user)
+
+def admins_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if flask_login.current_user.steam_id == "76561197965801299":
+            return f(*args, **kwargs)
+        return redirect(url_for("videos.no_vid_id"))
+    return decorated_function
+
+@bp.route("/queue")
+@admins_only
+def approval_queue():
+    return "Approval queue"
