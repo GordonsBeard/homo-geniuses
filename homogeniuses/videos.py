@@ -2,14 +2,18 @@
 
 import dataclasses
 import random
+import re
 
-from flask import Blueprint, redirect, render_template, url_for, session
+from flask import Blueprint, flash, redirect, render_template, request, url_for, session
 import flask_login #type: ignore
+from flask_login import login_required
+from wtforms import Form, HiddenField, StringField, ValidationError #type: ignore
 
 from homogeniuses import db
 
 bp = Blueprint("videos", __name__, url_prefix="/vid")
 
+YOUTUBE_REGEX = re.compile(r"^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))((\w|-){11})(?:\S+)?$")
 
 @dataclasses.dataclass
 class Video:  # pylint: disable=missing-class-docstring
@@ -106,6 +110,23 @@ def vote_on_video(video_id, vote_type):
 
     return result
 
-@bp.route("/submit")
-def submit_clips():
-    return "Submit a clip here."
+class SubmitForm(Form):
+    video_url = StringField("YouTube Video URL")
+
+    def validate_video_url(form, field):
+        if not YOUTUBE_REGEX.match(field.data):
+            raise ValidationError("Invalid YouTube URL.")
+
+def get_id_from_video_url(video_url):
+    return YOUTUBE_REGEX.match(video_url).group(1)
+
+@bp.route("/submit", methods=['GET', 'POST'])
+@login_required
+def submit_clip():
+    form = SubmitForm(request.form)
+    if request.method == 'POST' and form.validate():
+        video_url = get_id_from_video_url(form.video_url.data)
+        insert_into_queue_sql = """INSERT INTO queue (video_id, approval_status, submitter_id) VALUES (?, ?, ?)"""
+        db.insert_db(insert_into_queue_sql, (video_url, 0, flask_login.current_user.steam_id))
+        flash("Video submitted.")
+    return render_template("videos/submit.html", form=form, user=flask_login.current_user)

@@ -17,10 +17,10 @@
         <ul class="site-nav">
             <li><a href="{{ url_for('faq') }}">what is this place?</a></li>
             <li><a href="{{ url_for('videos.no_video_id') }}">cast judgement</a></li>
-            <li><a href="{{ url_for('videos.submit_clips') }}">submit clips</a></li>
+            <li><a href="{{ url_for('videos.submit_clip') }}">submit clips</a></li>
             {% if not user.is_anonymous %}
-            <li><a href="{{ url_for('user.edit_user_profile', steam_id = user.steam_id) }}"><img src="{{ user.avatar }}" alt="Steam avatar for {{user.handle}}" width="24" height="24"/></a> <a href="{{ url_for('user.edit_user_profile', steam_id = user.steam_id) }}">profile</a></li>
-            <li><a href="{{ url_for('auth.logout') }}">jack out</a></li>
+                <li><a href="{{ url_for('user.edit_user_profile', steam_id = user.steam_id) }}"><img src="{{ user.avatar }}" alt="Steam avatar for {{user.handle}}" width="24" height="24"/></a> <a href="{{ url_for('user.edit_user_profile', steam_id = user.steam_id) }}">profile</a></li>
+                <li><a href="{{ url_for('auth.logout') }}">jack out</a></li>
             {% else %}
             <li><a href="{{ url_for('auth.login') }}">sign in (via steam)</a></li>
             {% endif %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}: Submit a clip{% endblock %}
+
+{% block main %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<form method=post>
+    <dl>
+        <dt>{{ form.video_url.label }}</dt>
+        <dd>{{ form.video_url(autocomplete="off") }}</dd>
+    </dl>
+    {% if form.video_url.errors %}
+    <ul class=errors>
+        {% for error in form.video_url.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
