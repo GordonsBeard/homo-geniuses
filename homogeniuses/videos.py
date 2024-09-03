@@ -40,10 +40,18 @@ def get_all_videos() -> list[Video]:
     return all_videos_list
 
 
-def get_random_video() -> Video:
+def get_random_video(steam_id=None) -> Video:
     """Returns just a single video from the list of all videos"""
-    random_vid = random.choice(get_all_videos())
-    return random_vid
+    # Grab a video that a user hasn't voted on
+    get_user_votes_sql = """SELECT video_id FROM votes WHERE steam_id = ?"""
+    get_user_votes = db.query_db(get_user_votes_sql, (steam_id,))
+    videos_voted_on = [x["video_id"] for x in get_user_votes]
+    all_videos = get_all_videos()
+    filtered_videos = [x for x in all_videos if x.video_id not in videos_voted_on]
+    if steam_id and any(filtered_videos):
+        return random.choice(filtered_videos)
+    
+    return random.choice(get_all_videos())
 
 
 def add_video_to_db(video_id) -> None:
@@ -53,17 +61,27 @@ def add_video_to_db(video_id) -> None:
 
 
 @bp.route("/")
-def no_video_id():
+def no_video_id(steam_id=None):
     """If no video id was supplied just throw them to a random page"""
-    random_video_id = get_random_video().video_id
+    
+    if steam_id:
+        pass
+
+    random_video_id = get_random_video(steam_id).video_id
     return redirect(url_for('videos.video_page', video_id=random_video_id))
 
 
 @bp.route("/random")
 def random_video():
     """Random video selection."""
-    return no_video_id()
+    steam_id = request.args["steam_id"] if "steam_id" in request.args else None
+    return no_video_id(steam_id)
 
+def get_user_votes_for_video(steam_id, video_id):
+    """Checks to see if a user can cast another vote on this video."""
+    get_user_votes_sql = """SELECT * FROM votes WHERE steam_id = ? AND video_id = ?"""
+    result = db.query_db(get_user_votes_sql, (steam_id, video_id), one=True)
+    return result["vote"] if result else None
 
 @bp.route("/<video_id>")
 def video_page(video_id):
@@ -71,22 +89,31 @@ def video_page(video_id):
     fetched_video = fetch_video(video_id)
     if fetched_video is None:
         return "Bad video_id"
+    user_steam_id = flask_login.current_user.steam_id if flask_login.current_user.is_authenticated else None
+    users_prev_vote = get_user_votes_for_video(user_steam_id, video_id)
     session["video_id"] = video_id
 
-    return render_template("videos/video_page.html", video=fetched_video, user=flask_login.current_user)
+    return render_template("videos/video_page.html", 
+                           video=fetched_video, 
+                           user=flask_login.current_user, 
+                           users_prev_vote=users_prev_vote)
 
 
-def cast_vote(video_id, vote_type) -> bool:
+def cast_vote(video_id, vote_type, steam_id) -> bool:
     """Writes the vote to the database"""
     hvote_sql = """UPDATE videos SET homo_votes = ? WHERE video_id = ?"""
     gvote_sql = """UPDATE videos SET genius_votes = ? WHERE video_id = ?"""
+    user_vote_sql = """INSERT INTO votes (steam_id, video_id, vote) VALUES (?, ?, ?)"""
     success = False
     video = fetch_video(video_id)
     if video:
         if vote_type == "hvote":
             success = db.insert_db(hvote_sql, (video.homo_votes + 1, video_id))
+            success = db.insert_db(user_vote_sql, (steam_id, video_id, 0))
         elif vote_type == "gvote":
             success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
+            success = db.insert_db(user_vote_sql, (steam_id, video_id, 1))
+            
 
     return success
 
@@ -101,10 +128,10 @@ def vote_on_video(video_id, vote_type):
 
     if vote_type == "hvote":
         result["message"] = "homo vote logged"
-        result["success"] = cast_vote(video_id, vote_type)
+        result["success"] = cast_vote(video_id, vote_type, flask_login.current_user.steam_id)
     elif vote_type == "gvote":
         result["message"] = "genius vote logged"
-        result["success"] = cast_vote(video_id, vote_type)
+        result["success"] = cast_vote(video_id, vote_type, flask_login.current_user.steam_id)
     else:
         result["message"] = "unknown vote"
         result["success"] = False
@@ -135,7 +162,7 @@ def submit_clip():
 def admins_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if flask_login.current_user.steam_id == "76561197965801299":
+        if flask_login.current_user.steam_id == "76561197965801299": # it's me!!!! :3
             return f(*args, **kwargs)
         return redirect(url_for("videos.no_vid_id"))
     return decorated_function

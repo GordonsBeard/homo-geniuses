@@ -12,10 +12,11 @@ CREATE TABLE users (
 
 CREATE TABLE votes (
     steam_id TEXT NOT NULL,
-    idea_id TEXT NOT NULL,
+    video_id TEXT NOT NULL,
     vote INTEGER NOT NULL,
-    unique(steam_id, idea_id),
-    FOREIGN KEY (steam_id) REFERENCES user (steam_id)
+    unique(steam_id, video_id),
+    FOREIGN KEY (steam_id) REFERENCES user (steam_id),
+    FOREIGN KEY (video_id) REFERENCES videos (video_id)
 );
 
 CREATE TABLE videos (

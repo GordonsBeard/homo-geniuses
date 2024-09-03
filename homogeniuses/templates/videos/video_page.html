@@ -5,14 +5,22 @@
     <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
 <nav class="video-nav" aria-label="Video navigation">
-    <a href="{{ url_for('videos.random_video') }}">Random video</a>
+    <ul>
+        <li><a href="{{ url_for('videos.random_video') }}">Random video</a></li>
+        <li><a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">Next random video without my vote</a></li>
+    </ul>
 </nav>
 <div class="votes" aria-label="Vote options">
-    {% set disabled = "disabled" if not user.is_authenticated else ""%}
-    <div class="login-nag {{disabled}}"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a></div>
+    {% set disabled = "disabled" if not user.is_authenticated else "" %}
+    <div class="vote-over login-nag {{disabled}}"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a></div>
     <button type="button" class="hvote" {{disabled}}>homo <span class="hcount">{{ video.homo_votes }}</span></button>
     <button type="button" class="gvote" {{disabled}}>genius <span class="gcount">{{ video.genius_votes }}</span></button>
 </div>
+{% if users_prev_vote != None %}
+<div class="already-voted">You previously voted: {{ "homo" if users_prev_vote == 0 else "genius" }}.</div>
+{% else %}
+<div class="already-voted">You have not voted.</div>
+{% endif %}
 <div class="score" aria-label="Video score">
     <p>{{ sentiment }}</p>
 </div>

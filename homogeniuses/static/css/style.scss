@@ -94,16 +94,20 @@ main {
             font-size: 2rem;
         }
 
-        .login-nag {
-            position: absolute;
-            background-color: darkslategrey;
-            opacity: 60%;
+        .vote-over {
             height: 100%;
             width: 100%;
-            align-items: center;
-            justify-content: center;
+            position: absolute;
             visibility: hidden;
             display: none;
+        }
+
+        .login-nag {
+            background-color: darkslategrey;
+            opacity: 60%;
+            align-items: center;
+            justify-content: center;
+
 
             &:hover {
                 opacity: 100%;
