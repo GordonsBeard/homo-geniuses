@@ -4,3 +4,5 @@ instance/
 __pycache__
 *.pyc
 config.py
+style.css
+style.css.map
