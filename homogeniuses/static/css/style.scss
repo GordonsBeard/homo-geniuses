@@ -153,8 +153,21 @@ main {
 
     p.golden {
         font-size: 18px;
-        font-weight: 600;
-        
+        font-weight: 600;  
     }
 
+    .score {
+        .score-bar {
+            display: flex;
+            outline: 1px solid black;
+
+            .homo-bar {
+                background-color: pink;
+            }
+
+            .genius-bar {
+                background-color: blueviolet;
+            }
+        }
+    }
 }

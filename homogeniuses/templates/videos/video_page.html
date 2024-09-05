@@ -22,6 +22,10 @@
 <div class="already-voted">You have not voted.</div>
 {% endif %}
 <div class="score" aria-label="Video score">
+    <div class="score-bar">
+        <div class="homo-bar bar" data-votes="{{ video.homo_votes }}">homo: {{ video.homo_votes }}</div>
+        <div class="genius-bar bar" data-votes="{{ video.genius_votes }}">genius: {{ video.genius_votes }}</div>
+    </div>
     <p>{{ sentiment }}</p>
 </div>
 {% endblock %}
