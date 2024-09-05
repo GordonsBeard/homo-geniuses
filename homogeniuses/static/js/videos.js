@@ -4,8 +4,8 @@ const homo_button = document.querySelector("button.hvote");
 const genius_button = document.querySelector("button.gvote");
 const homo_votes = document.querySelector("span.hcount");
 const genius_votes = document.querySelector("span.gcount");
-const score_bars = document.querySelectorAll(".score-bar .bar")
-
+const score_bars = document.querySelectorAll(".score-bar .bar");
+const already_voted = document.querySelector(".votes .already-voted");
 
 function cast_vote(evt) {
     const vote_type = evt.currentTarget;
@@ -16,6 +16,7 @@ function cast_vote(evt) {
             .then(data => {
                 if (data.success == true) {
                     homo_votes.innerHTML = Number(homo_votes.innerHTML) + 1;
+                    already_voted.innerHTML = "You have voted: homo";
                 }
             });
     }
@@ -27,13 +28,11 @@ function cast_vote(evt) {
             .then(data => {
                 if (data.success == true) {
                     genius_votes.innerHTML = Number(genius_votes.innerHTML) + 1;
+                    already_voted.innerHTML = "You have voted: genius";
                 }
             });
     }
 }
-
-homo_button.addEventListener("click", cast_vote)
-genius_button.addEventListener("click", cast_vote)
 
 function update_bar_widths() {
     if (score_bars.length != 2) {
@@ -51,35 +50,28 @@ function update_bar_widths() {
     homo_width = 0;
 
     if (hvotes == 0) {
-        console.log("Zero homo votes");
         genius_width = 100;
         homo_width = 0;
     }
     else if (gvotes == 0) {
-        console.log("Zero genius votes");
         homo_width = 100;
         genius_width = 0;
     }
     else if (hvotes == gvotes) {
-        console.log("Equal votes");
         homo_width = 50;
         genius_width = 50;
     }
     else {
         total_votes = Number(hvotes) + Number(gvotes);
-        console.log(`total votes: ${total_votes}`);
-        homo_width = (100 * hvotes) / total_votes;
-        console.log(`homo width: ${homo_width}`);
+        homo_width = Math.floor((100 * hvotes) / total_votes);
         genius_width = 100 - homo_width;
-        console.log(`genius width: ${genius_width}`);
 
     }
-    console.log(homo_width);
-    console.log(genius_width);
 
-    // homo
     score_bars[0].style.width = `${homo_width}%`;
     score_bars[1].style.width = `${genius_width}%`;
 }
 
+homo_button.addEventListener("click", cast_vote)
+genius_button.addEventListener("click", cast_vote)
 update_bar_widths();

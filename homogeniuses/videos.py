@@ -93,10 +93,26 @@ def video_page(video_id):
     users_prev_vote = get_user_votes_for_video(user_steam_id, video_id)
     session["video_id"] = video_id
 
+    hvotes = fetched_video.homo_votes
+    gvotes = fetched_video.genius_votes
+
+    score = (100 * hvotes) / (hvotes + gvotes)
+    sentiment = "No votes!"
+
+    if score > 60:
+        sentiment = "This moment is a certified homo moment."
+    elif score < 40:
+        sentiment = "This moment is a certified genius moment."
+    elif 40 < score < 60:
+        sentiment = "Certified homo-genius moment."
+    else:
+        sentiment = "I did math wrong."
+
     return render_template("videos/video_page.html", 
                            video=fetched_video, 
                            user=flask_login.current_user, 
-                           users_prev_vote=users_prev_vote)
+                           users_prev_vote=users_prev_vote,
+                           sentiment=sentiment)
 
 
 def cast_vote(video_id, vote_type, steam_id) -> bool:
