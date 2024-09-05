@@ -1,5 +1,6 @@
 """database handling and mishandling of goods and services"""
 
+import random
 import sqlite3
 
 import click
@@ -74,9 +75,25 @@ def init_videos_command():
     fill_video_db()
     click.echo("Populated video database.")
 
+def add_fake_votes():
+    """Fills the video db with random votes for testings purposes."""
+    insert_votes_sql = """UPDATE videos SET homo_votes = ?, genius_votes = ? WHERE video_id = ?"""
+    db = get_db()
+    fake_votes = []
+    for video in dummy_vids.homo_genius_og_vids:
+        fake_votes.append((random.randint(0, 100), random.randint(0, 100), video[0]))
+    #print(fake_votes)
+    db.executemany(insert_votes_sql, fake_votes)
+    db.commit()
+
+@click.command("mock-votes")
+def add_fake_votes_command():
+    add_fake_votes()
+    click.echo("Populated video database with fake votes.")
 
 def init_app(app):
     """init shit, stop making me write docstrings"""
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
     app.cli.add_command(init_videos_command)
+    app.cli.add_command(add_fake_votes_command)
