@@ -26,6 +26,15 @@
         </ul>
     </nav>
     <main class="">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
         {% block main %}{% endblock main %}
     </main>
     {% block script %}{% endblock script %}
