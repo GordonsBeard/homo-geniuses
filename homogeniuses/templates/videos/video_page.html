@@ -27,7 +27,7 @@
 </div>
 <div class="score" aria-label="Video score">
     <p class="sentiment">{{ sentiment }}</p>
-    {% set hide = "hidden" if score < 0 else "" %}
+    {% set hide = "hidden" if score < 0  or (video.homo_votes + video.genius_votes) < 10 else "" %}
     <div class="score-bar {{hide}}">    
         <div class="guide">
             <div class="homo-section">GENIUS</div>
