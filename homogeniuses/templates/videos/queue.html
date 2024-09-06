@@ -4,9 +4,54 @@
 
 {% block main %}
 <h2>Videos in approval queue:</h2>
-<ul>
-{% for video in queued_vids %}
-<li><a href='https://youtu.be/{{ video["video_id"] }}'>{{ video["video_id"] }}</a>: {{ video["submitter_id"] }} <a href="{{ url_for('videos.update_approval_queue', video_id=video['video_id'])}}">Approve</a> <a href="">Deny</a></li>
-{% endfor %}
-</ul>
+<table>
+    <caption>Videos in approval queue</caption>
+    <thead>
+        <tr>
+            <th>YouTube Links</th>
+            <th>Submitter</th>
+            <th>Approve</th>
+            <th>Deny</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for video in queued_vids %}
+        {% if video["approval_status"] == 0 %}
+        <tr>
+            <td><a href='https://youtu.be/{{ video["video_id"] }}'>https://youtu.be/{{ video["video_id"] }}</a></td>
+            <td>{{ video["submitter_id"] }}</td>
+            <td><a href="{{ url_for('videos.approve_from_queue', video_id=video['video_id'])}}">Approve</a></td>
+            <td><a href="{{ url_for('videos.deny_from_queue', video_id=video['video_id'])}}">Deny</a></td>
+            <td><a href="{{ url_for('videos.delete_from_queue', video_id=video['video_id'])}}">Delete</a></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<table>
+    <caption>Previously Denied Videos</caption>
+    <thead>
+        <tr>
+            <th>YouTube Links</th>
+            <th>Submitter</th>
+            <th>Approve</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for video in queued_vids %}
+        {% if video["approval_status"] == 1 %}
+        <tr>
+            <td><a href='https://youtu.be/{{ video["video_id"] }}'>https://youtu.be/{{ video["video_id"] }}</a></td>
+            <td>{{ video["submitter_id"] }}</td>
+            <td><a href="{{ url_for('videos.approve_from_queue', video_id=video['video_id'])}}">Approve</a></td>
+            <td><a href="{{ url_for('videos.delete_from_queue', video_id=video['video_id'])}}">Delete</a></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

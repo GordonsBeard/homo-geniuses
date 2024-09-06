@@ -37,7 +37,7 @@ function cast_vote(evt) {
             score_bars[1].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
         }
     
-    totalVotes = Number(score_bars[0].dataset.votes) + Number(score_bars[1].dataset.votes);
+    totalVotes = Number(score_bars[0].dataset.votes) +   Number(score_bars[1].dataset.votes);
     if (score_bar_cont.classList.contains("hidden")) { 
         sentiment.innerHTML = "Too few votes to certify results, 10 needed.";
         if (totalVotes >= 10){

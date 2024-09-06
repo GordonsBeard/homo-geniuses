@@ -82,7 +82,6 @@ def add_fake_votes():
     fake_votes = []
     for video in dummy_vids.homo_genius_og_vids:
         fake_votes.append((random.randint(0, 100), random.randint(0, 100), video[0]))
-    #print(fake_votes)
     db.executemany(insert_votes_sql, fake_votes)
     db.commit()
 
@@ -91,9 +90,22 @@ def add_fake_votes_command():
     add_fake_votes()
     click.echo("Populated video database with fake votes.")
 
+def add_fake_queue():
+    insert_queue_sql = """INSERT INTO queue (video_id, submitter_id) VALUES (?, ?)"""
+    db = get_db()
+
+    db.executemany(insert_queue_sql, dummy_vids.videos_to_queue)
+    db.commit()
+
+@click.command("mock-queue")
+def add_fake_queue_command():
+    add_fake_queue()
+    click.echo("Added mock videos to queue.")
+
 def init_app(app):
     """init shit, stop making me write docstrings"""
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
     app.cli.add_command(init_videos_command)
     app.cli.add_command(add_fake_votes_command)
+    app.cli.add_command(add_fake_queue_command)

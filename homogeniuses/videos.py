@@ -204,7 +204,7 @@ def approval_queue():
 
 @bp.route("/approve")
 @admins_only
-def update_approval_queue():
+def approve_from_queue():
     video_id = request.args["video_id"] if "video_id" in request.args else None
     
     add_video_sql = """INSERT INTO videos (video_id) VALUES (?)"""
@@ -214,4 +214,26 @@ def update_approval_queue():
     db.insert_db(remove_vid_from_queue_sql, (video_id,))  
 
     flash(f"Video with id of {video_id} approved.")
+    return redirect(url_for("videos.approval_queue"))
+
+@bp.route("/deny")
+@admins_only
+def deny_from_queue():
+    video_id = request.args["video_id"] if "video_id" in request.args else None
+    
+    update_queue_sql = """UPDATE queue SET approval_status = 1 WHERE video_id = ?"""
+    db.insert_db(update_queue_sql, (video_id,))  
+
+    flash(f"Denied video with ID of: {video_id}. Approval status set to: 1.")
+    return redirect(url_for("videos.approval_queue"))
+
+@bp.route("/delete")
+@admins_only
+def delete_from_queue():
+    video_id = request.args["video_id"] if "video_id" in request.args else None
+    
+    delete_queue_sql = """DELETE FROM queue WHERE video_id = ?"""
+    db.insert_db(delete_queue_sql, (video_id,))  
+
+    flash(f"Deleted video with ID of: {video_id} from approval queue.")
     return redirect(url_for("videos.approval_queue"))

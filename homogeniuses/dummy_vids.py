@@ -130,3 +130,11 @@ homo_genius_og_vids = (
     ("Kl4gbss3Hu8",),
     ("n5H3hwIbP14",),
 )
+
+videos_to_queue = (
+    ("SnmDoT7JBsI", "76561197965801299"),
+    ("Ml5D0_ZFD50", "76561197965801299"),
+    ("iVAWm8VNmQA", "76561197965801299"),
+    ("SB6k7L8Rs94", "76561197965801299"),
+    ("aOLgpDyWyBY", "76561197965801299"),
+)
