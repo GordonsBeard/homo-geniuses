@@ -2,9 +2,6 @@
     box-sizing: border-box;
 }
 
-html {
-}
-
 a {
   color: #222;
 }
@@ -168,6 +165,11 @@ main {
             outline: 1px solid black;
             position: relative;
             height: 50px;
+
+            &.hidden {
+                display: none;
+                visibility: hidden;
+            }    
             
             .guide {
                 width: 100%;

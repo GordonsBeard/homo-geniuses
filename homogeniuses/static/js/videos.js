@@ -4,8 +4,10 @@ const homo_button = document.querySelector("button.hvote");
 const genius_button = document.querySelector("button.gvote");
 const homo_votes = document.querySelector("span.hcount");
 const genius_votes = document.querySelector("span.gcount");
+const score_bar_cont = document.querySelector(".score-bar");
 const score_bars = document.querySelectorAll(".score-bar .bar");
 const already_voted = document.querySelector(".votes .already-voted");
+const sentiment = document.querySelector(".sentiment");
 
 function cast_vote(evt) {
     const vote_type = evt.currentTarget;
@@ -19,6 +21,7 @@ function cast_vote(evt) {
                     already_voted.innerHTML = "You have voted: homo";
                 }
             });
+            score_bars[0].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
     }
 
     else if (vote_type.classList.contains("gvote")) {
@@ -31,7 +34,15 @@ function cast_vote(evt) {
                     already_voted.innerHTML = "You have voted: genius";
                 }
             });
+            score_bars[1].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
+        }
+    
+    if (score_bar_cont.classList.contains("hidden")) { 
+        score_bar_cont.classList.remove("hidden");
+        sentiment.innerHTML = "Too few votes to certify results, 10 needed.";
     }
+
+    update_bar_widths();
 }
 
 function update_bar_widths() {

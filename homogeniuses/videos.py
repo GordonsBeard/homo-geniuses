@@ -96,10 +96,21 @@ def video_page(video_id):
     hvotes = fetched_video.homo_votes
     gvotes = fetched_video.genius_votes
 
-    score = (100 * hvotes) / (hvotes + gvotes)
+    score = -1
     sentiment = "No votes!"
 
-    if score > 60:
+    if hvotes == 0 and gvotes == 0:
+        score = -1
+    elif gvotes == 0:
+        score = 100
+    else:
+        score = (100 * hvotes) / (hvotes + gvotes)
+
+    if score == -1:
+        sentiment = "No votes yet, be the first!"
+    elif (hvotes + gvotes) < 10:
+        sentiment = "Not enough votes to certify a result, 10 needed."
+    elif score > 60:
         sentiment = "This moment is a certified homo moment."
     elif score < 40:
         sentiment = "This moment is a certified genius moment."
@@ -112,7 +123,8 @@ def video_page(video_id):
                            video=fetched_video, 
                            user=flask_login.current_user, 
                            users_prev_vote=users_prev_vote,
-                           sentiment=sentiment)
+                           sentiment=sentiment,
+                           score=score)
 
 
 def cast_vote(video_id, vote_type, steam_id) -> bool:
@@ -186,4 +198,20 @@ def admins_only(f):
 @bp.route("/queue")
 @admins_only
 def approval_queue():
-    return "Approval queue"
+    videos_in_queue_sql = """SELECT video_id, approval_status, submitter_id FROM queue"""
+    queued_vids = db.query_db(videos_in_queue_sql)
+    return render_template("videos/queue.html", queued_vids=queued_vids, user=flask_login.current_user)
+
+@bp.route("/approve")
+@admins_only
+def update_approval_queue():
+    video_id = request.args["video_id"] if "video_id" in request.args else None
+    
+    add_video_sql = """INSERT INTO videos (video_id) VALUES (?)"""
+    db.insert_db(add_video_sql, (video_id,))
+
+    remove_vid_from_queue_sql = """DELETE FROM queue WHERE video_id = ?"""
+    db.insert_db(remove_vid_from_queue_sql, (video_id,))  
+
+    flash(f"Video with id of {video_id} approved.")
+    return redirect(url_for("videos.approval_queue"))
