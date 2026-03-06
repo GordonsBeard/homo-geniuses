@@ -9,8 +9,18 @@
 </div>
 <nav class="video-nav" aria-label="Video navigation">
     <ul>
+        {% if prev_video %}
+        <li><a href="{{ url_for('videos.video_page', video_id=prev_video) }}">Prev video</a></li>
+        {% else %}
+        <li>Prev video</li>
+        {% endif %}
         <li><a href="{{ url_for('videos.random_video') }}">Random video</a></li>
         <li><a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">Random video (without my vote)</a>
+            {% if next_video %}
+        <li><a href="{{ url_for('videos.video_page', video_id=next_video) }}">Next video</a></li>
+        {% else %}
+        <li>Next video</li>
+        {% endif %}
         </li>
     </ul>
 </nav>

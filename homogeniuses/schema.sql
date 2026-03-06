@@ -22,7 +22,8 @@ CREATE TABLE votes (
 CREATE TABLE videos (
     video_id TEXT NOT NULL PRIMARY KEY,
     homo_votes INTEGER NOT NULL DEFAULT 0,
-    genius_votes INTEGER NOT NULL DEFAULT 0
+    genius_votes INTEGER NOT NULL DEFAULT 0,
+    timestamp DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime'))
 );
 
 CREATE TABLE queue (

@@ -2,6 +2,7 @@
 
 import random
 import sqlite3
+import time
 
 import click
 from flask import current_app, g
@@ -65,7 +66,9 @@ def fill_video_db():
     """Fills the video db with some test videos."""
     insert_vid_sql = """INSERT INTO videos (video_id) VALUES (?);"""
     db = get_db()
-    db.executemany(insert_vid_sql, dummy_vids.homo_genius_og_vids)
+    for video in dummy_vids.homo_genius_og_vids:
+        db.execute(insert_vid_sql, video)
+        time.sleep(0.05)
     db.commit()
 
 
@@ -75,9 +78,12 @@ def init_videos_command():
     fill_video_db()
     click.echo("Populated video database.")
 
+
 def add_fake_votes():
     """Fills the video db with random votes for testings purposes."""
-    insert_votes_sql = """UPDATE videos SET homo_votes = ?, genius_votes = ? WHERE video_id = ?"""
+    insert_votes_sql = (
+        """UPDATE videos SET homo_votes = ?, genius_votes = ? WHERE video_id = ?"""
+    )
     db = get_db()
     fake_votes = []
     for video in dummy_vids.homo_genius_og_vids:
@@ -85,10 +91,12 @@ def add_fake_votes():
     db.executemany(insert_votes_sql, fake_votes)
     db.commit()
 
+
 @click.command("mock-votes")
 def add_fake_votes_command():
     add_fake_votes()
     click.echo("Populated video database with fake votes.")
+
 
 def add_fake_queue():
     insert_queue_sql = """INSERT INTO queue (video_id, submitter_id) VALUES (?, ?)"""
@@ -97,10 +105,12 @@ def add_fake_queue():
     db.executemany(insert_queue_sql, dummy_vids.videos_to_queue)
     db.commit()
 
+
 @click.command("mock-queue")
 def add_fake_queue_command():
     add_fake_queue()
     click.echo("Added mock videos to queue.")
+
 
 def init_app(app):
     """init shit, stop making me write docstrings"""

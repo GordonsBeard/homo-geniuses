@@ -1,23 +1,27 @@
 """Videos, the main interaction segment of the website (votes and stuff too)"""
 
 import dataclasses
-from functools import wraps
 import random
 import re
+from functools import wraps
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for, session
-import flask_login #type: ignore
+import flask_login  # type: ignore
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import login_required
-from wtforms import Form, HiddenField, StringField, ValidationError #type: ignore
+from wtforms import Form, StringField, ValidationError  # type: ignore
 
 from homogeniuses import db
 
 bp = Blueprint("videos", __name__, url_prefix="/vid")
 
-YOUTUBE_REGEX = re.compile(r"^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))((\w|-){11})(?:\S+)?$")
+YOUTUBE_REGEX = re.compile(
+    r"^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))((\w|-){11})(?:\S+)?$"
+)
+
 
 @dataclasses.dataclass
 class Video:  # pylint: disable=missing-class-docstring
+    timestamp: str
     video_id: str
     homo_votes: int = 0
     genius_votes: int = 0
@@ -25,11 +29,36 @@ class Video:  # pylint: disable=missing-class-docstring
 
 def fetch_video(video_id) -> Video | None:
     """Returns a single video from a given video_id"""
-    select_video_sql = (
-        """SELECT video_id, homo_votes, genius_votes FROM videos WHERE video_id = ?"""
-    )
+    select_video_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos WHERE video_id = ?"""
     video = db.query_db(select_video_sql, (video_id,), one=True)
     return Video(*video) if video else None
+
+
+def fetch_video_nav(video_id) -> (Video) | None:
+    """Returns a single video from a given video_id"""
+    select_video_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos WHERE video_id = ?"""
+    video = db.query_db(select_video_sql, (video_id,), one=True)
+
+    if not video:
+        return None
+
+    video = Video(*video)
+
+    previous_video_id = ""
+    next_video_id = ""
+
+    prev_videos_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos WHERE timestamp < ? ORDER BY timestamp DESC LIMIT 1"""
+    prev_videos_result = db.query_db(prev_videos_sql, (video.timestamp,), one=True)
+    if prev_videos_result:
+        previous_video_id = prev_videos_result[1]
+
+    next_videos_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos WHERE timestamp > ? ORDER BY timestamp ASC LIMIT 1"""
+    next_videos_result = db.query_db(next_videos_sql, (video.timestamp,), one=True)
+    if next_videos_result:
+        next_video_id = next_videos_result[1]
+
+    return (video, previous_video_id, next_video_id)
+
 
 def fetch_vote(steam_id, video_id) -> int:
     """Returns the previous vote for the video"""
@@ -37,17 +66,18 @@ def fetch_vote(steam_id, video_id) -> int:
     vote = db.query_db(has_user_voted_before, (steam_id, video_id), one=True)
     if not vote:
         return -1
-    
+
     if vote[0] == 0:
         return 0
     else:
         return 1
 
 
-
 def get_all_videos() -> list[Video]:
     """Returns all videos currently in database"""
-    get_all_videos_sql = """SELECT video_id, homo_votes, genius_votes FROM videos;"""
+    get_all_videos_sql = (
+        """SELECT rowid, video_id, homo_votes, genius_votes FROM videos;"""
+    )
     all_videos = db.query_db(get_all_videos_sql)
     all_videos_list = [Video(*row) for row in all_videos]
     return all_videos_list
@@ -63,7 +93,7 @@ def get_random_video(steam_id=None) -> Video:
     filtered_videos = [x for x in all_videos if x.video_id not in videos_voted_on]
     if steam_id and any(filtered_videos):
         return random.choice(filtered_videos)
-    
+
     return random.choice(get_all_videos())
 
 
@@ -76,12 +106,12 @@ def add_video_to_db(video_id) -> None:
 @bp.route("/")
 def no_video_id(steam_id=None):
     """If no video id was supplied just throw them to a random page"""
-    
+
     if steam_id:
         pass
 
     random_video_id = get_random_video(steam_id).video_id
-    return redirect(url_for('videos.video_page', video_id=random_video_id))
+    return redirect(url_for("videos.video_page", video_id=random_video_id))
 
 
 @bp.route("/random")
@@ -90,19 +120,26 @@ def random_video():
     steam_id = request.args["steam_id"] if "steam_id" in request.args else None
     return no_video_id(steam_id)
 
+
 def get_user_votes_for_video(steam_id, video_id):
     """Checks to see if a user can cast another vote on this video."""
     get_user_votes_sql = """SELECT * FROM votes WHERE steam_id = ? AND video_id = ?"""
     result = db.query_db(get_user_votes_sql, (steam_id, video_id), one=True)
     return result["vote"] if result else None
 
+
 @bp.route("/<video_id>")
 def video_page(video_id):
     """Default view/page for watching a video."""
-    fetched_video = fetch_video(video_id)
+    # fetched_video = fetch_video(video_id)
+    fetched_video, prev_video, next_video = fetch_video_nav(video_id)
     if fetched_video is None:
         return "Bad video_id"
-    user_steam_id = flask_login.current_user.steam_id if flask_login.current_user.is_authenticated else None
+    user_steam_id = (
+        flask_login.current_user.steam_id
+        if flask_login.current_user.is_authenticated
+        else None
+    )
     users_prev_vote = get_user_votes_for_video(user_steam_id, video_id)
     session["video_id"] = video_id
 
@@ -132,12 +169,16 @@ def video_page(video_id):
     else:
         sentiment = "I did math wrong."
 
-    return render_template("videos/video_page.html", 
-                           video=fetched_video, 
-                           user=flask_login.current_user, 
-                           users_prev_vote=users_prev_vote,
-                           sentiment=sentiment,
-                           score=score)
+    return render_template(
+        "videos/video_page.html",
+        video=fetched_video,
+        prev_video=prev_video,
+        next_video=next_video,
+        user=flask_login.current_user,
+        users_prev_vote=users_prev_vote,
+        sentiment=sentiment,
+        score=score,
+    )
 
 
 def cast_vote(video_id, vote_type, steam_id) -> bool:
@@ -166,8 +207,9 @@ def cast_vote(video_id, vote_type, steam_id) -> bool:
         if vote == -1:
             success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
             success = db.insert_db(user_vote_sql, (steam_id, video_id, 1))
-            
+
     return success
+
 
 def reset_vote(video_id, steam_id) -> bool:
     """Resets a user's vote on a video"""
@@ -182,10 +224,14 @@ def reset_vote(video_id, steam_id) -> bool:
     update_vote_sql = ""
 
     if vote == 0:
-        update_vote_sql = """UPDATE videos SET homo_votes = homo_votes - 1 WHERE video_id = ?"""
+        update_vote_sql = (
+            """UPDATE videos SET homo_votes = homo_votes - 1 WHERE video_id = ?"""
+        )
     elif vote == 1:
-        update_vote_sql = """UPDATE videos SET genius_votes = genius_votes - 1 WHERE video_id = ?"""
-    
+        update_vote_sql = (
+            """UPDATE videos SET genius_votes = genius_votes - 1 WHERE video_id = ?"""
+        )
+
     db.insert_db(update_vote_sql, (video_id,))
 
     # subtract that
@@ -205,10 +251,14 @@ def vote_on_video(video_id, vote_type):
 
     if vote_type == "hvote":
         result["message"] = "homo vote logged"
-        result["success"] = cast_vote(video_id, vote_type, flask_login.current_user.steam_id)
+        result["success"] = cast_vote(
+            video_id, vote_type, flask_login.current_user.steam_id
+        )
     elif vote_type == "gvote":
         result["message"] = "genius vote logged"
-        result["success"] = cast_vote(video_id, vote_type, flask_login.current_user.steam_id)
+        result["success"] = cast_vote(
+            video_id, vote_type, flask_login.current_user.steam_id
+        )
     elif vote_type == "reset":
         result["message"] = "vote reset"
         result["success"] = reset_vote(video_id, flask_login.current_user.steam_id)
@@ -218,6 +268,7 @@ def vote_on_video(video_id, vote_type):
 
     return result
 
+
 class SubmitForm(Form):
     video_url = StringField("YouTube Video URL")
 
@@ -225,67 +276,83 @@ class SubmitForm(Form):
         if not YOUTUBE_REGEX.match(field.data):
             raise ValidationError("Invalid YouTube URL.")
 
+
 def get_id_from_video_url(video_url):
     return YOUTUBE_REGEX.match(video_url).group(1)
 
-@bp.route("/submit", methods=['GET', 'POST'])
+
+@bp.route("/submit", methods=["GET", "POST"])
 @login_required
 def submit_clip():
     form = SubmitForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == "POST" and form.validate():
         video_url = get_id_from_video_url(form.video_url.data)
         insert_into_queue_sql = """INSERT INTO queue (video_id, approval_status, submitter_id) VALUES (?, ?, ?)"""
-        db.insert_db(insert_into_queue_sql, (video_url, 0, flask_login.current_user.steam_id))
+        db.insert_db(
+            insert_into_queue_sql, (video_url, 0, flask_login.current_user.steam_id)
+        )
         flash("Video submitted.")
-    return render_template("videos/submit.html", form=form, user=flask_login.current_user)
+    return render_template(
+        "videos/submit.html", form=form, user=flask_login.current_user
+    )
+
 
 def admins_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if flask_login.current_user.steam_id == "76561197965801299": # it's me!!!! :3
+        if flask_login.current_user.steam_id == "76561197965801299":  # it's me!!!! :3
             return f(*args, **kwargs)
         return redirect(url_for("videos.no_vid_id"))
+
     return decorated_function
+
 
 @bp.route("/queue")
 @admins_only
 def approval_queue():
-    videos_in_queue_sql = """SELECT video_id, approval_status, submitter_id FROM queue"""
+    videos_in_queue_sql = (
+        """SELECT video_id, approval_status, submitter_id FROM queue"""
+    )
     queued_vids = db.query_db(videos_in_queue_sql)
-    return render_template("videos/queue.html", queued_vids=queued_vids, user=flask_login.current_user)
+    return render_template(
+        "videos/queue.html", queued_vids=queued_vids, user=flask_login.current_user
+    )
+
 
 @bp.route("/approve")
 @admins_only
 def approve_from_queue():
     video_id = request.args["video_id"] if "video_id" in request.args else None
-    
+
     add_video_sql = """INSERT INTO videos (video_id) VALUES (?)"""
     db.insert_db(add_video_sql, (video_id,))
 
     remove_vid_from_queue_sql = """DELETE FROM queue WHERE video_id = ?"""
-    db.insert_db(remove_vid_from_queue_sql, (video_id,))  
+    db.insert_db(remove_vid_from_queue_sql, (video_id,))
 
     flash(f"Video with id of {video_id} approved.")
     return redirect(url_for("videos.approval_queue"))
+
 
 @bp.route("/deny")
 @admins_only
 def deny_from_queue():
     video_id = request.args["video_id"] if "video_id" in request.args else None
-    
+
     update_queue_sql = """UPDATE queue SET approval_status = 1 WHERE video_id = ?"""
-    db.insert_db(update_queue_sql, (video_id,))  
+    db.insert_db(update_queue_sql, (video_id,))
 
     flash(f"Denied video with ID of: {video_id}. Approval status set to: 1.")
     return redirect(url_for("videos.approval_queue"))
+
 
 @bp.route("/delete")
 @admins_only
 def delete_from_queue():
     video_id = request.args["video_id"] if "video_id" in request.args else None
-    
+
     delete_queue_sql = """DELETE FROM queue WHERE video_id = ?"""
-    db.insert_db(delete_queue_sql, (video_id,))  
+    db.insert_db(delete_queue_sql, (video_id,))
 
     flash(f"Deleted video with ID of: {video_id} from approval queue.")
     return redirect(url_for("videos.approval_queue"))
