@@ -31,6 +31,19 @@ def fetch_video(video_id) -> Video | None:
     video = db.query_db(select_video_sql, (video_id,), one=True)
     return Video(*video) if video else None
 
+def fetch_vote(steam_id, video_id) -> int:
+    """Returns the previous vote for the video"""
+    has_user_voted_before = """SELECT steam_id, video_id, vote FROM votes WHERE steam_id = ? AND video_id = ?"""
+    vote = db.query_db(has_user_voted_before, (steam_id, video_id), one=True)
+    if not vote:
+        return -1
+    
+    if vote[0] == 0:
+        return 0
+    else:
+        return 1
+
+
 
 def get_all_videos() -> list[Video]:
     """Returns all videos currently in database"""
@@ -134,16 +147,52 @@ def cast_vote(video_id, vote_type, steam_id) -> bool:
     user_vote_sql = """INSERT INTO votes (steam_id, video_id, vote) VALUES (?, ?, ?)"""
     success = False
     video = fetch_video(video_id)
-    if video:
-        if vote_type == "hvote":
+
+    if not video:
+        return success
+
+    # has the user already voted?
+    vote = fetch_vote(steam_id, video_id)
+
+    # HOMO = 0
+    # GENIUS = 1
+    # NOVOTE = -1
+
+    if vote_type == "hvote":
+        if vote == -1:
             success = db.insert_db(hvote_sql, (video.homo_votes + 1, video_id))
             success = db.insert_db(user_vote_sql, (steam_id, video_id, 0))
-        elif vote_type == "gvote":
+    elif vote_type == "gvote":
+        if vote == -1:
             success = db.insert_db(gvote_sql, (video.genius_votes + 1, video_id))
             success = db.insert_db(user_vote_sql, (steam_id, video_id, 1))
             
-
     return success
+
+def reset_vote(video_id, steam_id) -> bool:
+    """Resets a user's vote on a video"""
+    # look up what they voted
+    prev_users_vote = """SELECT steam_id, video_id, vote FROM votes WHERE steam_id = ? AND video_id = ?"""
+    prev_vote_result = db.query_db(prev_users_vote, (steam_id, video_id), one=True)
+
+    if not prev_vote_result:
+        return False
+
+    vote = prev_vote_result[2]
+    update_vote_sql = ""
+
+    if vote == 0:
+        update_vote_sql = """UPDATE videos SET homo_votes = homo_votes - 1 WHERE video_id = ?"""
+    elif vote == 1:
+        update_vote_sql = """UPDATE videos SET genius_votes = genius_votes - 1 WHERE video_id = ?"""
+    
+    db.insert_db(update_vote_sql, (video_id,))
+
+    # subtract that
+    # delete their Vote entry
+    reset_vote_sql = """DELETE FROM votes WHERE video_id = ? AND steam_id = ?"""
+    success = db.insert_db(reset_vote_sql, (video_id, steam_id))
+    return True
 
 
 @bp.route("/<video_id>/<vote_type>")
@@ -160,6 +209,9 @@ def vote_on_video(video_id, vote_type):
     elif vote_type == "gvote":
         result["message"] = "genius vote logged"
         result["success"] = cast_vote(video_id, vote_type, flask_login.current_user.steam_id)
+    elif vote_type == "reset":
+        result["message"] = "vote reset"
+        result["success"] = reset_vote(video_id, flask_login.current_user.steam_id)
     else:
         result["message"] = "unknown vote"
         result["success"] = False
@@ -169,7 +221,7 @@ def vote_on_video(video_id, vote_type):
 class SubmitForm(Form):
     video_url = StringField("YouTube Video URL")
 
-    def validate_video_url(form, field):
+    def validate_video_url(self, form, field):
         if not YOUTUBE_REGEX.match(field.data):
             raise ValidationError("Invalid YouTube URL.")
 

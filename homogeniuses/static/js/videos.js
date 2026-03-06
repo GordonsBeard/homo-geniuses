@@ -2,6 +2,7 @@ var video_id = document.getElementById("vid").dataset.video_id;
 
 const homo_button = document.querySelector("button.hvote");
 const genius_button = document.querySelector("button.gvote");
+const reset_button = document.querySelector("button.reset");
 const homo_votes = document.querySelector("span.hcount");
 const genius_votes = document.querySelector("span.gcount");
 const score_bar_cont = document.querySelector(".score-bar");
@@ -19,11 +20,20 @@ function cast_vote(evt) {
                 if (data.success == true) {
                     homo_votes.innerHTML = Number(homo_votes.innerHTML) + 1;
                     already_voted.innerHTML = "You have voted: homo";
+                    score_bars[0].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
                 }
             });
-            score_bars[0].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
     }
-
+    else if (vote_type.classList.contains("reset")) {
+        const vote_url = `/vid/${video_id}/reset`;
+        fetch(vote_url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success == true) {
+                    window.location.reload();
+                }
+            });
+    }
     else if (vote_type.classList.contains("gvote")) {
         const vote_url = `/vid/${video_id}/gvote`;
         fetch(vote_url)
@@ -32,20 +42,21 @@ function cast_vote(evt) {
                 if (data.success == true) {
                     genius_votes.innerHTML = Number(genius_votes.innerHTML) + 1;
                     already_voted.innerHTML = "You have voted: genius";
+                    score_bars[1].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
                 }
             });
-            score_bars[1].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
-        }
-    
-    totalVotes = Number(score_bars[0].dataset.votes) +   Number(score_bars[1].dataset.votes);
-    if (score_bar_cont.classList.contains("hidden")) { 
+    }
+
+    totalVotes = Number(score_bars[0].dataset.votes) + Number(score_bars[1].dataset.votes);
+    if (score_bar_cont.classList.contains("hidden")) {
         sentiment.innerHTML = "Too few votes to certify results, 10 needed.";
-        if (totalVotes >= 10){
+        if (totalVotes >= 10) {
             score_bar_cont.classList.remove("hidden");
         }
     }
 
     update_bar_widths();
+    disable_votes();
 }
 
 function update_bar_widths() {
@@ -86,6 +97,12 @@ function update_bar_widths() {
     score_bars[1].style.width = `${genius_width}%`;
 }
 
+function disable_votes() {
+    homo_button.disabled = true;
+    genius_button.disabled = true;
+}
+
 homo_button.addEventListener("click", cast_vote)
 genius_button.addEventListener("click", cast_vote)
+reset_button.addEventListener("click", cast_vote)
 update_bar_widths();

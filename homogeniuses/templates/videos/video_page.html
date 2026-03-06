@@ -2,33 +2,44 @@
 
 {% block main %}
 <div id="vid" class="video" aria-label="Homo-genius video" data-video_id="{{ video.video_id }}">
-    <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
 </div>
 <nav class="video-nav" aria-label="Video navigation">
     <ul>
         <li><a href="{{ url_for('videos.random_video') }}">Random video</a></li>
-        <li><a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">Random video (without my vote)</a></li>
+        <li><a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">Random video (without my vote)</a>
+        </li>
     </ul>
 </nav>
 <div class="votes" aria-label="Vote options">
-    {% set disabled = "disabled" if not user.is_authenticated else "" %}
-    <div class="vote-over login-nag {{disabled}}"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a></div>
+    {% if not user.is_authenticated %}
+    <div class="vote-over login-nag disabled"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a>
+    </div>
+    {% endif %}
+    {% set disabled = "disabled" if not user.is_authenticated or users_prev_vote != None else "" %}
     <button type="button" class="hvote" {{disabled}}>homo <span class="hcount">{{ video.homo_votes }}</span></button>
-    
+
     <div class="already-voted">
         {% if users_prev_vote != None %}
         <p>You previously voted: {{ "homo" if users_prev_vote == 0 else "genius" }}.</p>
+        <p>
+            <button type="button" class="reset">reset vote</button>
+        </p>
         {% else %}
         <p>No vote logged.</p>
         {% endif %}
     </div>
-    
-    <button type="button" class="gvote" {{disabled}}>genius <span class="gcount">{{ video.genius_votes }}</span></button>
+
+    <button type="button" class="gvote" {{disabled}}>genius <span class="gcount">{{ video.genius_votes
+            }}</span></button>
 </div>
 <div class="score" aria-label="Video score">
     <p class="sentiment">{{ sentiment }}</p>
-    {% set hide = "hidden" if score < 0  or (video.homo_votes + video.genius_votes) < 10 else "" %}
-    <div class="score-bar {{hide}}">    
+    {% set hide = "hidden" if score < 0 or (video.homo_votes + video.genius_votes) < 10 else "" %} <div
+        class="score-bar {{hide}}">
         <div class="guide">
             <div class="homo-section">GENIUS</div>
             <div class="tied-section">HOMO-GENIUS</div>
@@ -36,7 +47,7 @@
         </div>
         <div class="homo-bar bar" data-votes="{{ video.homo_votes }}"></div>
         <div class="genius-bar bar" data-votes="{{ video.genius_votes }}"></div>
-    </div>
+</div>
 
 </div>
 {% endblock %}
