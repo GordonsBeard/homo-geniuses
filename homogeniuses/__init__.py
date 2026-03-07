@@ -38,9 +38,6 @@ def create_app(test_config=None):
         return User(*user_vals) if user_vals else None
 
     @app.route("/")
-    def index():
-        return videos.no_video_id()
-
     @app.route("/faq")
     def faq():
         return render_template("faq.html", user=flask_login.current_user)

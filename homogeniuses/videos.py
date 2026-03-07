@@ -75,11 +75,10 @@ def fetch_vote(steam_id, video_id) -> int:
 
 def get_all_videos() -> list[Video]:
     """Returns all videos currently in database"""
-    get_all_videos_sql = (
-        """SELECT rowid, video_id, homo_votes, genius_votes FROM videos;"""
-    )
+    get_all_videos_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos ORDER BY timestamp ASC;"""
     all_videos = db.query_db(get_all_videos_sql)
     all_videos_list = [Video(*row) for row in all_videos]
+
     return all_videos_list
 
 
@@ -121,6 +120,38 @@ def random_video():
     return no_video_id(steam_id)
 
 
+@bp.route("/list")
+def video_list():
+    """The list of all clips submitted"""
+
+    all_videos = get_all_videos()
+
+    get_top_homo_vids_sql = """SELECT timestamp, video_id, homo_votes, genius_votes, homo_votes-genius_votes AS homo_score, homo_votes+genius_votes AS total_votes FROM videos WHERE total_votes > 10 ORDER BY homo_score DESC LIMIT 15;"""
+    get_top_genius_vids_sql = """SELECT timestamp, video_id, homo_votes, genius_votes, genius_votes-homo_votes AS genius_score, homo_votes+genius_votes AS total_votes FROM videos WHERE total_votes > 10 ORDER BY genius_score DESC LIMIT 15;"""
+    homogenius_vids_sql = """SELECT timestamp, video_id, homo_votes, genius_votes, homo_votes+genius_votes AS total_votes, (homo_votes*100.0)/(homo_votes+genius_votes) AS score, ABS(50.0-((homo_votes*100.0)/(homo_votes+genius_votes))) as difference FROM videos WHERE score >= 40 AND score <= 60 AND total_votes > 10 ORDER BY difference ASC;"""
+    get_all_videos_sql = """SELECT timestamp, video_id, homo_votes, genius_votes FROM videos ORDER BY timestamp ASC;"""
+    all_videos = db.query_db(get_all_videos_sql)
+    all_videos_list = [Video(*row) for row in all_videos]
+
+    homo_videos = db.query_db(get_top_homo_vids_sql)
+    homo_videos_list = list(homo_videos)
+
+    genius_videos = db.query_db(get_top_genius_vids_sql)
+    genius_videos_list = list(genius_videos)
+
+    homogenius_videos = db.query_db(homogenius_vids_sql)
+    homogenius_list = list(homogenius_videos)
+
+    return render_template(
+        "videos/list_page.html",
+        all_videos=all_videos,
+        user=flask_login.current_user,
+        homo_videos_list=homo_videos_list,
+        genius_videos_list=genius_videos_list,
+        homogenius_list=homogenius_list,
+    )
+
+
 def get_user_votes_for_video(steam_id, video_id):
     """Checks to see if a user can cast another vote on this video."""
     get_user_votes_sql = """SELECT * FROM votes WHERE steam_id = ? AND video_id = ?"""
@@ -152,9 +183,9 @@ def video_page(video_id):
     if hvotes == 0 and gvotes == 0:
         score = -1
     elif gvotes == 0:
-        score = 100
+        score = 100.0
     else:
-        score = (100 * hvotes) / (hvotes + gvotes)
+        score = (100.0 * hvotes) / (hvotes + gvotes)
 
     if score == -1:
         sentiment = "No votes yet, be the first!"

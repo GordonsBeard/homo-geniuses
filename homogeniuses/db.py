@@ -87,7 +87,7 @@ def add_fake_votes():
     db = get_db()
     fake_votes = []
     for video in dummy_vids.homo_genius_og_vids:
-        fake_votes.append((random.randint(0, 100), random.randint(0, 100), video[0]))
+        fake_votes.append((random.randint(0, 10), random.randint(0, 10), video[0]))
     db.executemany(insert_votes_sql, fake_votes)
     db.commit()
 

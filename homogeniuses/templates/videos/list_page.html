@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}: The List{% endblock %}
+
+{% block main %}
+
+<p>There are currently {{ all_videos|length }} submissions available for judgement. (## in queue awaiting approval)</p>
+
+<p>In total ## votes have been cast by ## users. (## homo votes and ## genius votes)</p>
+
+<h2>Certified Homo-Genius</h2>
+<p>Clips that are at least 90% homo-genius certified, and have more than 10 unique votes.</p>
+{% for video in homogenius_list %}
+<li><a href="{{ url_for('videos.video_page', video_id=video.video_id) }}">{{ video.video_id }}</a>: {{ video.total_votes
+    }}
+    votes, {{
+    '{:2.1f}'.format(100 - video.difference) }}% homo-genius
+</li>
+{% endfor %}
+
+
+<h2>Homo Ingenuity</h2>
+<p>Top 15 clips sorted by most homo ingenuity.</p>
+{% for video in homo_videos_list %}
+<li><a href="{{ url_for('videos.video_page', video_id=video.video_id) }}">{{ video.video_id }}</a>: {{ video.homo_votes
+    + video.genius_votes }} votes: {{
+    '{:03.1f}'.format((video.homo_votes/(video.homo_votes +
+    video.genius_votes)) * 100.0) }}% homo-magnificence</li>
+{% endfor %}
+
+<h2>Genuises at work</h2>
+<p>Top 15 clips of the biggest brain geniuses at work.</p>
+{% for video in genius_videos_list %}
+<li><a href="{{ url_for('videos.video_page', video_id=video.video_id) }}">{{ video.video_id }}</a>: {{ video.homo_votes
+    + video.genius_votes }} votes: {{
+    '{:03.1f}'.format((video.genius_votes/(video.homo_votes +
+    video.genius_votes)) * 100.0) }}% pure genius</li>
+{% endfor %}
+
+
+
+
+
+{% endblock %}
