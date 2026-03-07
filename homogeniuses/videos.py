@@ -162,7 +162,7 @@ def video_page(video_id):
         sentiment = "Not enough votes to certify a result, 10 needed."
     elif score > 60:
         sentiment = "This moment is a certified homo moment."
-    elif score < 40:
+    elif score <= 40:
         sentiment = "This moment is a certified genius moment."
     elif 40 < score < 60:
         sentiment = "Certified homo-genius moment."
