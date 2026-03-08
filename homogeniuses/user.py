@@ -1,8 +1,9 @@
 """User profiles, management, routes"""
 
 import flask_login  # type: ignore
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from wtforms import BooleanField, Form, SubmitField  # type: ignore
 
 from homogeniuses import db
 
@@ -32,16 +33,32 @@ class User:  # pylint: disable=missing-docstring
         return self.steam_id
 
 
+class SettingsForm(Form):
+    htoggle = BooleanField(label="Language Toggle")
+
+
 def create_or_update_user(steam_id, handle, avatar):
     """Grabs the user and updates their current handle if it's changed."""
     db.insert_db(
-        """INSERT INTO users (steam_id, handle, avatar, active)
-            VALUES (?, ?, ?, ?) ON CONFLICT(steam_id)
+        """INSERT INTO users (steam_id, handle, avatar, active, homo_toggle)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT(steam_id)
             DO UPDATE SET handle=excluded.handle, avatar=excluded.avatar""",
-        (steam_id, handle, avatar, True),
+        (steam_id, handle, avatar, True, False),
     )
     user = User(steam_id, handle, avatar, True)
     return user
+
+
+def hflag(steam_id) -> bool:
+    """Returns true if user has language flag toggled on."""
+    if len(steam_id) != 17:
+        return False
+    user_sql = """SELECT steam_id, homo_toggle FROM users WHERE steam_id = ?"""
+    user_result = db.query_db(user_sql, (steam_id,), one=True)
+    if not user_result or user_result[1] == 0:
+        print(user_result[0])
+        return False
+    return True
 
 
 @bp.route("/")
@@ -50,23 +67,24 @@ def no_user_supplied():
     return "No user id supplied."
 
 
-@bp.route("/<steam_id>")
-def user_profile(steam_id: str):
-    """public user profile"""
-    if steam_id == "":
-        return "No steamid provided"
-
-    return f"User profile for: {steam_id}"
-
-
+@bp.route("/settings", methods=["GET", "POST"])
 @login_required
-@bp.route("/<steam_id>/edit")
-def edit_user_profile(steam_id: str):
-    """public user profile"""
-    if steam_id == "":
-        return "No steamid provided"
+def edit_user_profile():
+    """edit site settings, allow homo toggle"""
+    setting_form = SettingsForm(request.form)
+    user = flask_login.current_user
+    if request.method == "POST" and setting_form.validate():
+        htoggle_value = 1 if setting_form.htoggle.data else 0
+        update_flag_sql = """UPDATE users SET homo_toggle = ? WHERE steam_id = ?"""
+        db.insert_db(update_flag_sql, (htoggle_value, user.steam_id))
+        flash("Saved settings!")
 
-    if steam_id != flask_login.current_user.steam_id:
-        return "You cannot edit this player's profile."
+    htoggle = hflag(user.steam_id)
+    print(htoggle)
 
-    return f"Editing user profile for: {steam_id}"
+    setting_form.htoggle.default = "checked" if htoggle else None
+    setting_form.htoggle.data = "checked" if htoggle else None
+
+    return render_template(
+        "user/settings_page.html", user=user, htoggle=htoggle, form=setting_form
+    )

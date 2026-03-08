@@ -4,15 +4,6 @@
 
 {% block main %}
 
-<div style="position:relative; height: 400px;">
-    <img src={{ url_for('static', filename='img/homogenius_frame.png' ) }} style="position: absolute" />
-    <video autoplay muted loop style="position: absolute; z-index: -1; top: 48px; left: 280px;">
-        <source src={{ url_for('static', filename='vid/homogenius-intro.mp4' ) }} type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
-
-
 <h3>What am I looking at?</h3>
 <p class="faq">homo-geniuses is a website that allows users to submit clips from competitive games and then cast
     judgement upon them; deciding if the clip is "genius" or "homo". Through this aggregation we will be able to

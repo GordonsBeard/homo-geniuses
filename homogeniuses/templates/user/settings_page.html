@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}: Site settings{% endblock %}
+
+{% block main %}
+<h2>Site Settings</h2>
+<p>User ID: {{ user.steam_id }}</p>
+<br>
+<form action="/user/settings" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.htoggle }}
+        {{ form.htoggle.label }}
+    </p>
+    <p>This will switch the terms "lucky" and "smart" to "homo" and "genius".</p>
+    <br>
+    <p><em>By toggling this setting on you agree that you are either: gay, an adult, or you understand the joke.</em>
+    </p>
+    <br>
+    <input type="submit" value="Save Settings">
+</form>
+{% endblock %}

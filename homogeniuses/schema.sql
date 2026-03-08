@@ -7,7 +7,8 @@ CREATE TABLE users (
     steam_id TEXT NOT NULL PRIMARY KEY,
     handle TEXT NOT NULL,
     active INTEGER DEFAULT 1,
-    avatar TEXT
+    avatar TEXT,
+    homo_toggle INTEGER DEFAULT 0
 );
 
 CREATE TABLE votes (
