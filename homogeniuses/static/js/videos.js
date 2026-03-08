@@ -9,6 +9,9 @@ const score_bar_cont = document.querySelector(".score-bar");
 const score_bars = document.querySelectorAll(".score-bar .bar");
 const already_voted = document.querySelector(".votes .already-voted");
 const sentiment = document.querySelector(".sentiment");
+const hlang = document.querySelector(".hlang").innerHTML;
+const glang = document.querySelector(".glang").innerHTML;
+
 
 function cast_vote(evt) {
     const vote_type = evt.currentTarget;
@@ -19,7 +22,7 @@ function cast_vote(evt) {
             .then(data => {
                 if (data.success == true) {
                     homo_votes.innerHTML = Number(homo_votes.innerHTML) + 1;
-                    already_voted.innerHTML = "You have voted: homo";
+                    already_voted.innerHTML = `You have voted: ${hlang}`;
                     score_bars[0].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
                 }
             });
@@ -41,7 +44,7 @@ function cast_vote(evt) {
             .then(data => {
                 if (data.success == true) {
                     genius_votes.innerHTML = Number(genius_votes.innerHTML) + 1;
-                    already_voted.innerHTML = "You have voted: genius";
+                    already_voted.innerHTML = `You have voted: ${glang}`;
                     score_bars[1].dataset.votes = Number(score_bars[1].dataset.votes) + 1;
                 }
             });

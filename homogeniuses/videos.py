@@ -162,6 +162,7 @@ def get_user_votes_for_video(steam_id, video_id):
 @bp.route("/<video_id>")
 def video_page(video_id):
     """Default view/page for watching a video."""
+
     # fetched_video = fetch_video(video_id)
     fetched_video, prev_video, next_video = fetch_video_nav(video_id)
     if fetched_video is None:
@@ -171,6 +172,14 @@ def video_page(video_id):
         if flask_login.current_user.is_authenticated
         else None
     )
+    lang = (
+        {"homo": "homo", "genius": "genius"}
+        if flask_login.current_user
+        and flask_login.current_user.is_authenticated
+        and flask_login.current_user.homo_toggle
+        else {"homo": "lucky", "genius": "smart"}
+    )
+    print(lang)
     users_prev_vote = get_user_votes_for_video(user_steam_id, video_id)
     session["video_id"] = video_id
 
@@ -192,9 +201,9 @@ def video_page(video_id):
     elif (hvotes + gvotes) < 10:
         sentiment = "Not enough votes to certify a result, 10 needed."
     elif score > 60:
-        sentiment = "This moment is a certified homo moment."
+        sentiment = f"This moment is a certified {lang["homo"]} moment."
     elif score <= 40:
-        sentiment = "This moment is a certified genius moment."
+        sentiment = f"This moment is a certified {lang["genius"]} moment."
     elif 40 < score < 60:
         sentiment = "Certified homo-genius moment."
     else:
@@ -209,6 +218,8 @@ def video_page(video_id):
         users_prev_vote=users_prev_vote,
         sentiment=sentiment,
         score=score,
+        genius=lang["genius"],
+        homo=lang["homo"],
     )
 
 

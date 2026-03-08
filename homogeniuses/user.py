@@ -11,11 +11,19 @@ bp = Blueprint("user", __name__, url_prefix="/user")
 
 
 class User:  # pylint: disable=missing-docstring
-    def __init__(self, steam_id: str, handle: str, avatar: str, active: bool = True):
+    def __init__(
+        self,
+        steam_id: str,
+        handle: str,
+        avatar: str,
+        active: bool = True,
+        homo_toggle: bool = False,
+    ):
         self.steam_id = steam_id
         self.handle = handle
         self.avatar = avatar
         self.active = active
+        self.homo_toggle = homo_toggle
 
     @property
     def is_active(self):
