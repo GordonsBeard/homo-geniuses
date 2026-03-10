@@ -10,7 +10,8 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import login_required
 from wtforms import Form, StringField, ValidationError  # type: ignore
 
-from homogeniuses import db
+from homogeniuses import db, lang_strings
+from homogeniuses.user import User
 
 bp = Blueprint("videos", __name__, url_prefix="/vid")
 
@@ -113,6 +114,18 @@ def no_video_id(steam_id=None):
     return redirect(url_for("videos.video_page", video_id=random_video_id))
 
 
+@bp.route("/oldest")
+def oldest_video():
+    all_videos = get_all_videos()
+    return redirect(url_for("videos.video_page", video_id=all_videos[0].video_id))
+
+
+@bp.route("/newest")
+def newest_video():
+    all_videos = get_all_videos()
+    return redirect(url_for("videos.video_page", video_id=all_videos[-1].video_id))
+
+
 @bp.route("/random")
 def random_video():
     """Random video selection."""
@@ -125,6 +138,7 @@ def video_list():
     """The list of all clips submitted"""
 
     all_videos = get_all_videos()
+    user: User = flask_login.current_user
 
     get_top_homo_vids_sql = """SELECT timestamp, video_id, homo_votes, genius_votes, homo_votes-genius_votes AS homo_score, homo_votes+genius_votes AS total_votes FROM videos WHERE total_votes > 10 ORDER BY homo_score DESC LIMIT 15;"""
     get_top_genius_vids_sql = """SELECT timestamp, video_id, homo_votes, genius_votes, genius_votes-homo_votes AS genius_score, homo_votes+genius_votes AS total_votes FROM videos WHERE total_votes > 10 ORDER BY genius_score DESC LIMIT 15;"""
@@ -142,13 +156,20 @@ def video_list():
     homogenius_videos = db.query_db(homogenius_vids_sql)
     homogenius_list = list(homogenius_videos)
 
+    strings = (
+        lang_strings.homo_dict
+        if not user.is_anonymous and user.hflag
+        else lang_strings.default_dict
+    )
+
     return render_template(
         "videos/list_page.html",
         all_videos=all_videos,
-        user=flask_login.current_user,
         homo_videos_list=homo_videos_list,
         genius_videos_list=genius_videos_list,
         homogenius_list=homogenius_list,
+        strings=strings,
+        user=user,
     )
 
 
@@ -167,19 +188,16 @@ def video_page(video_id):
     fetched_video, prev_video, next_video = fetch_video_nav(video_id)
     if fetched_video is None:
         return "Bad video_id"
-    user_steam_id = (
-        flask_login.current_user.steam_id
-        if flask_login.current_user.is_authenticated
-        else None
+
+    user = flask_login.current_user
+    strings = (
+        lang_strings.homo_dict
+        if not user.is_anonymous and user.hflag
+        else lang_strings.default_dict
     )
-    lang = (
-        {"homo": "homo", "genius": "genius"}
-        if flask_login.current_user
-        and flask_login.current_user.is_authenticated
-        and flask_login.current_user.homo_toggle
-        else {"homo": "lucky", "genius": "smart"}
-    )
-    print(lang)
+
+    user_steam_id = user.steam_id if user.is_authenticated else None
+
     users_prev_vote = get_user_votes_for_video(user_steam_id, video_id)
     session["video_id"] = video_id
 
@@ -201,9 +219,9 @@ def video_page(video_id):
     elif (hvotes + gvotes) < 10:
         sentiment = "Not enough votes to certify a result, 10 needed."
     elif score > 60:
-        sentiment = f"This moment is a certified {lang["homo"]} moment."
+        sentiment = f"This moment is a certified {strings["HOMO"]} moment."
     elif score <= 40:
-        sentiment = f"This moment is a certified {lang["genius"]} moment."
+        sentiment = f"This moment is a certified {strings["GENIUS"]} moment."
     elif 40 < score < 60:
         sentiment = "Certified homo-genius moment."
     else:
@@ -214,12 +232,11 @@ def video_page(video_id):
         video=fetched_video,
         prev_video=prev_video,
         next_video=next_video,
-        user=flask_login.current_user,
         users_prev_vote=users_prev_vote,
         sentiment=sentiment,
         score=score,
-        genius=lang["genius"],
-        homo=lang["homo"],
+        strings=strings,
+        user=user,
     )
 
 

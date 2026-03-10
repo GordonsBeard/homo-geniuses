@@ -7,6 +7,7 @@ import flask_login
 from flask import Flask, redirect, render_template
 from flask_login import LoginManager  # type: ignore
 
+from homogeniuses import lang_strings
 from homogeniuses.user import User
 
 
@@ -40,7 +41,15 @@ def create_app(test_config=None):
     @app.route("/")
     @app.route("/faq")
     def faq():
-        return render_template("faq.html", user=flask_login.current_user)
+        user = flask_login.current_user
+        strings = (
+            lang_strings.homo_dict
+            if not user.is_anonymous and user.hflag
+            else lang_strings.default_dict
+        )
+        return render_template(
+            "faq.html", user=flask_login.current_user, strings=strings
+        )
 
     from . import db
 

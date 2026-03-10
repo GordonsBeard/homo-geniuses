@@ -1,42 +1,47 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<div id="vid" class="video" aria-label="Homo-genius video" data-video_id="{{ video.video_id }}">
+<section class="fluid-yt" data-video_id="{{ video.video_id }}">
     <iframe src="https://www.youtube.com/embed/{{ video.video_id }}?controls=1" title="YouTube video player"
         frameborder="0"
         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
-</div>
-<nav class="video-nav" aria-label="Video navigation">
-    <ul>
+    <div class="grid">
+        <a href="{{ url_for('videos.oldest_video') }}">&lt;&lt; Oldest</a>
         {% if prev_video %}
-        <li><a href="{{ url_for('videos.video_page', video_id=prev_video) }}">Prev video</a></li>
+        <a href="{{ url_for('videos.video_page', video_id=prev_video) }}">&lt; Prev video</a>
         {% else %}
-        <li>Prev video</li>
+        Prev video
         {% endif %}
-        <li><a href="{{ url_for('videos.random_video') }}">Random video</a></li>
-        <li><a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">Random video (without my vote)</a>
-            {% if next_video %}
-        <li><a href="{{ url_for('videos.video_page', video_id=next_video) }}">Next video</a></li>
+        {% if user.steam_id %}
+        <a href="{{ url_for('videos.random_video', steam_id=user.steam_id) }}">New to me (without my
+            vote)</a>
         {% else %}
-        <li>Next video</li>
+        <a href="{{ url_for('videos.random_video') }}">Random Video</a>
         {% endif %}
-        </li>
-    </ul>
-</nav>
+        {% if next_video %}
+        <a href="{{ url_for('videos.video_page', video_id=next_video) }}">Next video &gt;</a>
+        {% else %}
+        Next video
+        {% endif %}
+        <a href="{{ url_for('videos.newest_video') }}">Newest &gt;&gt;</a>
+    </div>
+</section>
+
 <div class="votes" aria-label="Vote options">
     {% if not user.is_authenticated %}
     <div class="vote-over login-nag disabled"><a href="{{ url_for('auth.login') }}">Jack in to cast judgements!</a>
     </div>
     {% endif %}
     {% set disabled = "disabled" if not user.is_authenticated or users_prev_vote != None else "" %}
-    <button type="button" class="hvote" {{disabled}}><span class="hlang">{{ homo }}</span> <span class="hcount">{{
+    <button type="button" class="hvote" {{disabled}}><span class="hlang">{{ strings["HOMO"] }}</span> <span
+            class="hcount">{{
             video.homo_votes
             }}</span></button>
 
     <div class="already-voted">
         {% if users_prev_vote != None %}
-        <p>You previously voted: {{ homo if users_prev_vote == 0 else genius }}.</p>
+        <p>You previously voted: {{ strings["HOMO"] if users_prev_vote == 0 else strings["GENIUS"] }}.</p>
         <p>
             <button type="button" class="reset">reset vote</button>
         </p>
@@ -45,7 +50,8 @@
         {% endif %}
     </div>
 
-    <button type="button" class="gvote" {{disabled}}><span class="glang">{{ genius }}</span> <span class="gcount">{{
+    <button type="button" class="gvote" {{disabled}}><span class="glang">{{ strings["GENIUS"] }}</span> <span
+            class="gcount">{{
             video.genius_votes
             }}</span></button>
 </div>
@@ -54,9 +60,9 @@
     {% set hide = "hidden" if score < 0 or (video.homo_votes + video.genius_votes) < 10 else "" %} <div
         class="score-bar {{hide}}">
         <div class="guide">
-            <div class="homo-section">{{genius}}</div>
-            <div class="tied-section">HOMO-GENIUS</div>
-            <div class="genius-section">{{homo}}</div>
+            <div class="homo-section">{{ strings["GENIUS"] }}</div>
+            <div class="tied-section">{{ strings["HOMOGENIUS"] }}</div>
+            <div class="genius-section">{{ strings["HOMO"] }}</div>
         </div>
         <div class="homo-bar bar" data-votes="{{ video.homo_votes }}"></div>
         <div class="genius-bar bar" data-votes="{{ video.genius_votes }}"></div>
